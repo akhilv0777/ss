@@ -25,7 +25,7 @@ p{font-size:clamp(.9rem,2.3vw,1.05rem);line-height:1.75;color:var(--text-soft);m
 ::-webkit-scrollbar { display: none; }
 html { -ms-overflow-style: none; scrollbar-width: none; }
 /* ── BACKGROUND ── */
-#bgVideo {filter: opacity(0.1); position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 0; }
+#bgVideo {filter: opacity(0.3); position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 0; }
 .bg-overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg,rgba(1,9,18,.38) 0%,rgba(2,15,30,.22) 50%,rgba(1,8,16,.55) 100%);pointer-events:none;}
 .bg-container{position:fixed;inset:0;z-index:2;pointer-events:none;}
 .particle{position:fixed;border-radius:50%;pointer-events:none;z-index:2;opacity:.55;}
