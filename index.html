@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birthday</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Belanosima:wght@400;600;700&family=Merienda:wght@300..900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="shortcut icon" href="https://wallpapercave.com/dwp2x/wp3113283.jpg" type="image/x-icon">
+</head>
+
+<body>
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <i class="fa-solid fa-moon loader-icon"></i>
+    <p class="loader-text">Wait <span class="dots"></span></p>
+  </div>
+  <video src="./assets/ss (2).mp4" loop autoplay muted playsinline id="bgVideo"></video>
+  <div class="bg-overlay"></div>
+  <div class="bg-container" id="bgContainer"></div>
+  <audio id="bgMusic" src="./assets/music.mp3" loop></audio>
+  <div class="section-full" id="bookSection">
+    <div class="book-container" id="book"></div>
+    <div class="book-controls d-none">
+      <button onclick="goPrev()" class="btn-book">
+        <i class="fa-solid fa-chevron-left"></i> Previous
+      </button>
+      <button onclick="goNext()" class="btn-book">
+        Next <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  <div class="section-full" id="sliderSection">
+    <main class="slider-main">
+      <ul class='slider' id="sliderList"></ul>
+
+      <nav class='slider-nav'>
+        <ion-icon class='btn prev' name="arrow-back-outline"></ion-icon>
+        <ion-icon class='btn next' name="arrow-forward-outline"></ion-icon>
+      </nav>
+    </main>
+  </div>
+  <div class="section-full" id="carouselSection">
+    <div class="carousel" id="dragCarousel">
+    </div>
+  </div>
+  <div class="section-full" id="spinSection">
+    <div id="drag-container">
+      <div id="spin-container">
+        <p>From Developer Akhil</p>
+      </div>
+      <div id="ground"></div>
+    </div>
+  </div>
+  <div class="section-full" id="jhoomarSection">
+    <div class="jhoomar-container" id="jhoomar-container">
+    </div>
+  </div>
+  <div class="section-full" id="magicalGallerySection">
+    <div id="firefly-container"></div>
+
+    <div class="magical-container" id="magical-cards-container"></div>
+  </div>
+  <div class="section-full" id="frameSection">
+    <div class="frame" id="dynamicFrame">
+      <div class="text" id="dynamicTextContainer"></div>
+    </div>
+  </div>
+  <div class="section-full" id="cakeFinaleSection" style="background: #FFE6E6; overflow: hidden; position: relative;">
+    <div class="container-desk" id="mainContainerDesk">
+      <div class="lights">
+        <div class="bulb"></div>
+        <div class="bulb"></div>
+        <div class="bulb"></div>
+        <div class="bulb"></div>
+        <div class="bulb"></div>
+        <div class="bulb"></div>
+        <div class="bulb"></div>
+      </div>
+
+      <div class="hair1"></div>
+      <div class="hair2"></div>
+      <div class="hair3"></div>
+      <div class="clothes">
+        <div class="buttons1"></div>
+        <div class="buttons2"></div>
+        <div class="design"></div>
+      </div>
+      <div class="head"></div>
+      <div class="neck"></div>
+      <div id="eyeLeft"></div>
+      <div id="eyeRight"></div>
+      <div id="eyeBrowLeft"></div>
+      <div id="eyeBrowRight"></div>
+      <div id="nose"></div>
+      <div id="smile1"></div>
+      <div id="smile2"></div>
+      <div id="smile3"></div>
+      <div id="blush1"></div>
+      <div id="blush2"></div>
+
+      <div id="table"></div>
+      <div id="tableLeg"></div>
+      <div class="chocolate choc1"></div>
+      <div class="chocolate choc2"></div>
+      <div class="chocolate choc3"></div>
+
+      <div class="Clock">
+        <div id="hour"></div>
+        <div id="minute"></div>
+        <div id="second"></div>
+        <div class="block"></div>
+        <div class="numbers twelve">12</div>
+        <div class="numbers one">1</div>
+        <div class="numbers two">2</div>
+        <div class="numbers three">3</div>
+        <div class="numbers four">4</div>
+        <div class="numbers five">5</div>
+        <div class="numbers six">6</div>
+        <div class="numbers seven">7</div>
+        <div class="numbers eight">8</div>
+        <div class="numbers nine">9</div>
+        <div class="numbers ten">10</div>
+        <div class="numbers eleven">11</div>
+      </div>
+
+      <div id="cake" onclick="blowCandleAndReveal()">
+        <div id="tap-text">Tap the cake 🎂</div>
+        <div class="flame" id="flame"></div>
+        <div class="candle-sm"></div>
+        <div class="cake-top"></div>
+        <div class="cake-bottom"></div>
+      </div>
+
+      <div id="flowerPot"></div>
+      <div id="cup">
+        <i class="fa fa-heart" id="heartLeft"></i>
+        <i class="fa fa-heart" id="heartRight"></i>
+        <i class="fa fa-heart" id="heartCenter"></i>
+      </div>
+
+      <div id="chair"></div>
+      <div id="chairLeg"></div>
+      <div id="skirt"></div>
+      <div id="leg"></div>
+      <div id="shoe"></div>
+      <div id="shoulder"></div>
+    </div>
+
+    <div class="grand-reveal hidden" id="grandReveal">
+      <canvas id="birthdayCanvas"></canvas>
+      <h1 class="firework-text">Happy Birthday<br>Somu!<br> ❤️</h1>
+    </div>
+  </div>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
