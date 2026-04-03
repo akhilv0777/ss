@@ -1,121 +1,121 @@
 {
-  "book": [
-    { 
-      "id": "p1", 
-      "zIndex": 4, 
-      "isCover": true, 
-      "backContent": { "title": "Meri Pyaari Dost Saumya ko,", "text": "Tumhari zindagi ki khaas kitaab ka ek khaas adhyay...", "symbol": "💎" }, 
-      "frontContent": { "coverImg": "./assets/ss (1).jpg", "title": "The Golden Days of Saumya", "chapter": "Chapter 2026", "footer": "Aage badho" } 
-    },
-    { 
-      "id": "p2", 
-      "zIndex": 3, 
-      "backContent": { "img": "./assets/ss (2).jpg", "text": "\"Sone ka dil\" 💛" }, 
-      "frontContent": { "img": "./assets/ss (3).jpg", "text": "\"Yaadon ki mehfil\" 🎞️" } 
-    },
-    { 
-      "id": "p3", 
-      "zIndex": 2, 
-      "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Himmat aur naazekata\" 💪" }, 
-      "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Bade sapne\" 🚀" } 
-    },
-    { 
-      "id": "p4", 
-      "zIndex": 1, 
-      "backContent": { "title": "Hamesha Awesome Raho", "text": "Duniya tumhare bina adhuri hai!" }, 
-      "frontContent": { "img": "./assets/ss (6).jpg", "text": "\"Woh iconic vibe\" ✨" } 
-    }
-  ],
-  "memories": [
-    { "img": "./assets/ss (7).jpg", "title": "Your Amazing...", "desc": "I was thinking about you today and couldn't help but smile. Your presence has a way of making everything better." },
-    { "img": "./assets/ss (8).jpg", "title": "\"You are Magical\"", "desc": "\"Are you a magician? Because whenever I look at you, everyone else disappears. ✨\"" },
-    { "img": "./assets/ss (9).jpg", "title": "\"You are Always in my mind\"", "desc": "\"You're like a fine wine – you get better with time. 😍\"" },
-    { "img": "./assets/ss (10).jpg", "title": "\"When i Lost I find You..\"", "desc": "\"Do you have a map? Because I just keep getting lost in your eyes every time I see you. 🌟\"" },
-    { "img": "./assets/ss (11).jpg", "title": "\"You are cute ..\"", "desc": "\"If you were a cat, you'd purr-fectly steal my heart.\"" },
-    { "img": "./assets/ss (12).jpg", "title": "Your Smile..", "desc": "That bright smile of yours always lights up my world." },
-    { "img": "./assets/ss (13).jpg", "title": "Beautiful Soul..", "desc": "You have the most beautiful and kindest heart ever." },
-    { "img": "./assets/ss (14).jpg", "title": "Perfect Moments..", "desc": "Every single moment spent with you becomes a special memory." },
-    { "img": "./assets/ss (15).jpg", "title": "Endless Joy..", "desc": "Having you around brings endless joy and positivity." },
-    { "img": "./assets/ss (16).jpg", "title": "Forever..", "desc": "Always stay this amazing and keep shining bright." }
-  ],
-  "carousel": [
-    { "title": "Hi 👋", "num": "01", "img": "./assets/ss (17).jpg" },
-    { "title": "I want to tell you Something 😍", "num": "02", "img": "./assets/ss (18).jpg" },
-    { "title": "Please Keep Dragging 😊", "num": "03", "img": "./assets/ss (19).jpg" },
-    { "title": "You are Amazing 🤩", "num": "04", "img": "./assets/ss (20).jpg" },
-    { "title": "Most Beautiful Person 💯", "num": "05", "img": "./assets/ss (21).jpg" },
-    { "title": "And Cutest 🎀", "num": "06", "img": "./assets/ss (22).jpg" },
-    { "title": "And Since i met You 😗", "num": "07", "img": "./assets/ss (23).jpg" },
-    { "title": "I feel very Lucky 😇", "num": "08", "img": "./assets/ss (24).jpg" },
-    { "title": "and I have Crush on You 🥰", "num": "09", "img": "./assets/ss (25).jpg" },
-    { "title": "I love You ❤️", "num": "10", "img": "./assets/ss (26).jpg" }
-  ],
-  "spinner": [
-    { "img": "./assets/ss (27).jpg" },
-    { "img": "./assets/ss (28).jpg" },
-    { "img": "./assets/ss (29).jpg" },
-    { "img": "./assets/ss (30).jpg" },
-    { "img": "./assets/ss (31).jpg" },
-    { "img": "./assets/ss (32).jpg" },
-    { "img": "./assets/ss (33).jpg" },
-    { "img": "./assets/ss (34).jpg" },
-    { "img": "./assets/ss (35).jpg" },
-    { "img": "./assets/ss (36).jpg" }
-  ],
-  "jhoomar": [
-    { "img": "./assets/ss (37).jpg" },
-    { "img": "./assets/ss (38).jpg" },
-    { "img": "./assets/ss (39).jpg" },
-    { "img": "./assets/ss (40).jpg" },
-    { "img": "./assets/ss (41).jpg" },
-    { "img": "./assets/ss (42).jpg" },
-    { "img": "./assets/ss (43).jpg" },
-    { "img": "./assets/ss (44).jpg" },
-    { "img": "./assets/ss (45).jpg" },
-    { "img": "./assets/ss (46).jpg" }
-  ],
-  "letter": {
-    "title": "Happy Birthday Saumya! 🎂",
-    "message": "Dua hai ki tumhari zindagi ka har din itna hi khubsurat ho jitni tumhari muskaan hai. Hamesha khush raho aur aise hi chamakti raho! I Love You. ❤️"
-  },
-  "magicalGallery": [
-    { 
-      "id": "vid_1", "type": "video", 
-      "src": "./assets/ss (1).mp4", 
-      "frontNote": "Hamara Favorite Moment 🎥", 
-      "backNote": "Yeh pal hamesha yaad rahega! ❤️", 
-      "isMain": true 
-    },
-    { "id": "pic_1", "type": "image", "src": "./assets/ss (47).jpg", "frontNote": "Badlon Ke Upar ☁️", "backNote": "Dua hai ki tum aise hi hamesha asmaan chhooti raho!" },
-    { "id": "pic_2", "type": "image", "src": "./assets/ss (48).jpg", "frontNote": "Sabse Khubsurat 💯", "backNote": "Sach kahu toh, meri nazar mein tumse pyara aur koi nahi. Nazar na lage tumhe! 🧿" },
-    { "id": "pic_3", "type": "image", "src": "./assets/ss (49).jpg", "frontNote": "Woh Pyari Muskaan 😊", "backNote": "Tumhari yeh muskaan meri duniya roshan karti hai. Hamesha aise hi muskurana!" },
-    { "id": "pic_4", "type": "image", "src": "./assets/ss (50).jpg", "frontNote": "Yaadein ✨", "backNote": "Kuch pal jo hamesha dil ke kareeb rahenge." },
-    { "id": "pic_5", "type": "image", "src": "./assets/ss (51).jpg", "frontNote": "Nazar Na Lage 🧿", "backNote": "Hamesha buri nazar se bachi raho." },
-    { "id": "pic_6", "type": "image", "src": "./assets/ss (52).jpg", "frontNote": "Hamesha Saath 🤝", "backNote": "Dosti ka yeh silsila kabhi na tute." },
-    { "id": "pic_7", "type": "image", "src": "./assets/ss (53).jpg", "frontNote": "Khushiyan 🌟", "backNote": "Tumhari har dua qubool ho." },
-    { "id": "pic_8", "type": "image", "src": "./assets/ss (54).jpg", "frontNote": "Golden Times 🕰️", "backNote": "Yeh waqt sabse keemti hai." },
-    { "id": "pic_9", "type": "image", "src": "./assets/ss (55).jpg", "frontNote": "Perfect Clicks 📸", "backNote": "Har angle se ekdam perfect!" },
-    { "id": "pic_10", "type": "image", "src": "./assets/ss (56).jpg", "frontNote": "Meri Dost ❤️", "backNote": "Love you to the moon and back!" }
-  ],
-  "carouselCards": [
-    { "num": "01", "title": "Hi 👋", "img": "./assets/ss (57).jpg" },
-    { "num": "02", "title": "I want to tell you Something 😍", "img": "./assets/ss (58).jpg" },
-    { "num": "03", "title": "Please Keep Dragging 😊", "img": "./assets/ss (59).jpg" },
-    { "num": "04", "title": "You are Amazing 🤩", "img": "./assets/ss (60).jpg" },
-    { "num": "05", "title": "Most Beautiful Person 💯", "img": "./assets/ss (61).jpg" },
-    { "num": "06", "title": "And Cutest 🎀", "img": "./assets/ss (62).jpg" },
-    { "num": "07", "title": "And Since i met You 😗", "img": "./assets/ss (63).jpg" },
-    { "num": "08", "title": "I feel very Lucky 😇", "img": "./assets/ss (64).jpg" },
-    { "num": "09", "title": "and I have Crush on You 🥰", "img": "./assets/ss (65).jpg" },
-    { "num": "10", "title": "I love You ❤️", "img": "./assets/ss (66).jpg" },
-    { "num": "11", "title": "Keep Smiling ✨", "img": "./assets/ss (67).jpg" },
-    { "num": "12", "title": "Stay Awesome 🌟", "img": "./assets/ss (68).jpg" },
-    { "num": "13", "title": "You're the Best 💯", "img": "./assets/ss (69).jpg" },
-    { "num": "14", "title": "Beautiful Memories 📸", "img": "./assets/ss (70).jpg" },
-    { "num": "15", "title": "Happy Birthday! 🎂", "img": "./assets/ss (71).jpg" }
-  ],
-  "animatedFrame": {
-    "text": "HAPPY BIRTHDAY SAUMYA ❤️ ",
-    "img": "./assets/ss (72).jpg"
-  }
+   "book": [
+     {
+        "id": "p1",
+        "zIndex": 4,
+        "isCover": true,
+        "backContent": { "title": "To My Dearest Saumya,", "text": "A special chapter in the beautiful book of your life...", "symbol": "💎" },
+        "frontContent": { "coverImg": "./assets/ss (1).jpg", "title": "The Golden Days of Saumya", "chapter": "Chapter 2026", "footer": "Keep Moving Forward" }
+      },
+     {
+        "id": "p2",
+        "zIndex": 3,
+        "backContent": { "img": "./assets/ss (2).jpg", "text": "\"A heart of gold\" 💛" },
+        "frontContent": { "img": "./assets/ss (3).jpg", "text": "\"A gathering of memories\" 🎞️" }
+      },
+     {
+        "id": "p3",
+        "zIndex": 2,
+        "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Courage and tenderness\" 💪" },
+        "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Big dreams\" 🚀" }
+      },
+     {
+        "id": "p4",
+        "zIndex": 1,
+        "backContent": { "title": "Always Stay Awesome", "text": "The world is incomplete without you!" },
+        "frontContent": { "img": "./assets/ss (6).jpg", "text": "\"That iconic vibe\" ✨" }
+      }
+   ],
+   "memories": [
+     { "img": "./assets/ss (7).jpg", "title": "Your Amazing...", "desc": "I was thinking about you today and couldn't help but smile. Your presence has a way of making everything better." },
+     { "img": "./assets/ss (8).jpg", "title": "\"You are Magical\"", "desc": "\"Are you a magician? Because whenever I look at you, everyone else disappears. ✨\"" },
+     { "img": "./assets/ss (9).jpg", "title": "\"You are Always in my mind\"", "desc": "\"You're like a fine wine – you get better with time. 😍\"" },
+     { "img": "./assets/ss (10).jpg", "title": "\"When i Lost I find You..\"", "desc": "\"Do you have a map? Because I just keep getting lost in your eyes every time I see you. 🌟\"" },
+     { "img": "./assets/ss (11).jpg", "title": "\"You are cute ..\"", "desc": "\"If you were a cat, you'd purr-fectly steal my heart.\"" },
+     { "img": "./assets/ss (12).jpg", "title": "Your Smile..", "desc": "That bright smile of yours always lights up my world." },
+     { "img": "./assets/ss (13).jpg", "title": "Beautiful Soul..", "desc": "You have the most beautiful and kindest heart ever." },
+     { "img": "./assets/ss (14).jpg", "title": "Perfect Moments..", "desc": "Every single moment spent with you becomes a special memory." },
+     { "img": "./assets/ss (15).jpg", "title": "Endless Joy..", "desc": "Having you around brings endless joy and positivity." },
+     { "img": "./assets/ss (16).jpg", "title": "Forever..", "desc": "Always stay this amazing and keep shining bright." }
+   ],
+   "carousel": [
+     { "title": "Hi 👋", "num": "01", "img": "./assets/ss (17).jpg" },
+     { "title": "I want to tell you Something 😍", "num": "02", "img": "./assets/ss (18).jpg" },
+     { "title": "Please Keep Dragging 😊", "num": "03", "img": "./assets/ss (19).jpg" },
+     { "title": "You are Amazing 🤩", "num": "04", "img": "./assets/ss (20).jpg" },
+     { "title": "Most Beautiful Person 💯", "num": "05", "img": "./assets/ss (21).jpg" },
+     { "title": "And Cutest 🎀", "num": "06", "img": "./assets/ss (22).jpg" },
+     { "title": "And Since i met You 😗", "num": "07", "img": "./assets/ss (23).jpg" },
+     { "title": "I feel very Lucky 😇", "num": "08", "img": "./assets/ss (24).jpg" },
+     { "title": "and I have Crush on You 🥰", "num": "09", "img": "./assets/ss (25).jpg" },
+     { "title": "I love You ❤️", "num": "10", "img": "./assets/ss (26).jpg" }
+   ],
+   "spinner": [
+     { "img": "./assets/ss (27).jpg" },
+     { "img": "./assets/ss (28).jpg" },
+     { "img": "./assets/ss (29).jpg" },
+     { "img": "./assets/ss (30).jpg" },
+     { "img": "./assets/ss (31).jpg" },
+     { "img": "./assets/ss (32).jpg" },
+     { "img": "./assets/ss (33).jpg" },
+     { "img": "./assets/ss (34).jpg" },
+     { "img": "./assets/ss (35).jpg" },
+     { "img": "./assets/ss (36).jpg" }
+   ],
+   "jhoomar": [
+     { "img": "./assets/ss (37).jpg" },
+     { "img": "./assets/ss (38).jpg" },
+     { "img": "./assets/ss (39).jpg" },
+     { "img": "./assets/ss (40).jpg" },
+     { "img": "./assets/ss (41).jpg" },
+     { "img": "./assets/ss (42).jpg" },
+     { "img": "./assets/ss (43).jpg" },
+     { "img": "./assets/ss (44).jpg" },
+     { "img": "./assets/ss (45).jpg" },
+     { "img": "./assets/ss (46).jpg" }
+   ],
+   "letter": {
+     "title": "Happy Birthday Saumya! 🎂",
+     "message": "Happy Birthday to my amazing best friend, Saumya! 🎉 Wishing you a day as wonderfully bright and beautiful as you are. May all your dreams sparkle and come true. Keep shining, smiling, and being the incredible person you are! Love you to the moon and back! ❤️"
+   },
+   "magicalGallery": [
+     {
+        "id": "vid_1", "type": "video",
+        "src": "./assets/ss (1).mp4",
+        "frontNote": "Our Favorite Moment 🎥",
+        "backNote": "This moment will always be cherished! ❤️",
+        "isMain": true
+      },
+     { "id": "pic_1", "type": "image", "src": "./assets/ss (47).jpg", "frontNote": "Above the Clouds ☁️", "backNote": "Wishing you always reach for the sky like this!" },
+     { "id": "pic_2", "type": "image", "src": "./assets/ss (48).jpg", "frontNote": "Most Beautiful 💯", "backNote": "Honestly, in my eyes, no one is cuter than you. Nazar na lage tumhe! 🧿" },
+     { "id": "pic_3", "type": "image", "src": "./assets/ss (49).jpg", "frontNote": "That Sweet Smile 😊", "backNote": "Your smile brightens my world. Always keep smiling like this!" },
+     { "id": "pic_4", "type": "image", "src": "./assets/ss (50).jpg", "frontNote": "Memories ✨", "backNote": "Some moments that will always be close to the heart." },
+     { "id": "pic_5", "type": "image", "src": "./assets/ss (51).jpg", "frontNote": "Stay Protected 🧿", "backNote": "Always be safe from evil eyes." },
+     { "id": "pic_6", "type": "image", "src": "./assets/ss (52).jpg", "frontNote": "Always Together 🤝", "backNote": "May this bond of friendship never break." },
+     { "id": "pic_7", "type": "image", "src": "./assets/ss (53).jpg", "frontNote": "Happiness 🌟", "backNote": "May all your wishes come true." },
+     { "id": "pic_8", "type": "image", "src": "./assets/ss (54).jpg", "frontNote": "Golden Times 🕰️", "backNote": "This time is the most precious." },
+     { "id": "pic_9", "type": "image", "src": "./assets/ss (55).jpg", "frontNote": "Perfect Clicks 📸", "backNote": "Perfect from every angle!" },
+     { "id": "pic_10", "type": "image", "src": "./assets/ss (56).jpg", "frontNote": "My Friend ❤️", "backNote": "Love you to the moon and back!" }
+   ],
+   "carouselCards": [
+     { "num": "01", "title": "Hi 👋", "img": "./assets/ss (57).jpg" },
+     { "num": "02", "title": "I want to tell you Something 😍", "img": "./assets/ss (58).jpg" },
+     { "num": "03", "title": "Please Keep Dragging 😊", "img": "./assets/ss (59).jpg" },
+     { "num": "04", "title": "You are Amazing 🤩", "img": "./assets/ss (60).jpg" },
+     { "num": "05", "title": "Most Beautiful Person 💯", "img": "./assets/ss (61).jpg" },
+     { "num": "06", "title": "And Cutest 🎀", "img": "./assets/ss (62).jpg" },
+     { "num": "07", "title": "And Since i met You 😗", "num": "08", "img": "./assets/ss (63).jpg" },
+     { "num": "09", "title": "I feel very Lucky 😇", "img": "./assets/ss (64).jpg" },
+     { "num": "09", "title": "and I have Crush on You 🥰", "img": "./assets/ss (65).jpg" },
+     { "num": "10", "title": "I love You ❤️", "img": "./assets/ss (66).jpg" },
+     { "num": "11", "title": "Keep Smiling ✨", "img": "./assets/ss (67).jpg" },
+     { "num": "12", "title": "Stay Awesome 🌟", "img": "./assets/ss (68).jpg" },
+     { "num": "13", "title": "You're the Best 💯", "img": "./assets/ss (69).jpg" },
+     { "num": "14", "title": "Beautiful Memories 📸", "img": "./assets/ss (70).jpg" },
+     { "num": "15", "title": "Happy Birthday! 🎂", "img": "./assets/ss (71).jpg" }
+   ],
+   "animatedFrame": {
+     "text": "HAPPY BIRTHDAY SAUMYA ❤️ ",
+     "img": "./assets/ss (72).jpg"
+   }
 }
