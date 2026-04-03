@@ -31,8 +31,10 @@ fetch('data.json')
     renderJhoomar(data.jhoomar);
     renderMagicalGallery(data.magicalGallery);
     renderAnimatedFrame(data.animatedFrame);
-    document.getElementById('loader')?.classList.add('hidden');
-    document.querySelector('.book-controls')?.classList.remove('d-none');
+    setTimeout(() => {
+      document.getElementById('loader')?.classList.add('hidden');
+      document.querySelector('.book-controls')?.classList.remove('d-none');
+    }, 3000);
   })
   .catch(err => console.error('Failed to load data.json:', err));
 

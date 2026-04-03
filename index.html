@@ -4,22 +4,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birthday</title>
+  <title>Happy Birthday S....💕</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Belanosima:wght@400;600;700&family=Merienda:wght@300..900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" defer>
   <link rel="shortcut icon" href="./assets/ss (46).jpg" type="image/x-icon">
+  <link rel="apple-touch-icon" href="./assets/ss (46).jpg">
+  
 </head>
 
 <body>
   <div class="loader" id="loader">
     <div class="loader-ring"></div>
     <i class="fa-solid fa-moon loader-icon"></i>
-    <p class="loader-text">Wait <span class="dots"></span></p>
+    <p class="loader-text">Please Wait <i class="fa-regular fa-heart" style="color: rgb(255, 212, 59);"></i> <span class="dots"></span></p>
   </div>
   <video src="./assets/ss (2).mp4" loop autoplay muted playsinline id="bgVideo"></video>
   <div class="bg-overlay"></div>
@@ -72,7 +74,7 @@
       <div class="text" id="dynamicTextContainer"></div>
     </div>
   </div>
-  <div class="section-full" id="cakeFinaleSection" style="background: #FFE6E6; overflow: hidden; position: relative;">
+  <div class="section-full" id="cakeFinaleSection">
     <div class="container-desk" id="mainContainerDesk">
       <div class="lights">
         <div class="bulb"></div>
@@ -131,7 +133,7 @@
       </div>
 
       <div id="cake" onclick="blowCandleAndReveal()">
-        <div id="tap-text">Tap the cake 🎂</div>
+        <div id="tap-text">Tap the cake <i class="fa-solid fa-cake-candles"></i></div>
         <div class="flame" id="flame"></div>
         <div class="candle-sm"></div>
         <div class="cake-top"></div>
@@ -155,11 +157,11 @@
 
     <div class="grand-reveal hidden" id="grandReveal">
       <canvas id="birthdayCanvas"></canvas>
-      <h1 class="firework-text">Happy Birthday<br>Somu!<br> ❤️</h1>
+      <h1 class="firework-text">Happy Birthday<br>Somu!<br> <i class="fa-solid fa-heart fa-beat" style="color: rgb(107, 0, 0);"></i></h1>
     </div>
   </div>
-  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 
 </html>
