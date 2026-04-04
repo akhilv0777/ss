@@ -14,14 +14,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" defer>
   <link rel="shortcut icon" href="./assets/ss (46).jpg" type="image/x-icon">
   <link rel="apple-touch-icon" href="./assets/ss (46).jpg">
-  
+
 </head>
 
 <body>
   <div class="loader" id="loader">
     <div class="loader-ring"></div>
     <i class="fa-solid fa-moon loader-icon"></i>
-    <p class="loader-text">Please Wait <i class="fa-regular fa-heart" style="color: rgb(255, 212, 59);"></i> <span class="dots"></span></p>
+    <p class="loader-text">Please Wait <i class="fa-regular fa-heart" style="color: rgb(255, 212, 59);"></i> <span
+        class="dots"></span></p>
   </div>
   <video src="./assets/ss (2).mp4" loop autoplay muted playsinline id="bgVideo"></video>
   <div class="bg-overlay"></div>
@@ -29,11 +30,11 @@
   <audio id="bgMusic" src="./assets/music.mp3" loop></audio>
   <div class="section-full" id="bookSection">
     <div class="book-container" id="book"></div>
-    <div class="book-controls d-none">
-      <button onclick="goPrev()" class="btn-book">
+    <div class="book-controls">
+      <button id="prevBtn" onclick="goPrev()" class="btn-book">
         <i class="fa-solid fa-chevron-left"></i> Previous
       </button>
-      <button onclick="goNext()" class="btn-book">
+      <button id="nextBtn" onclick="goNext()" class="btn-book">
         Next <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
@@ -41,7 +42,6 @@
   <div class="section-full" id="sliderSection">
     <main class="slider-main">
       <ul class='slider' id="sliderList"></ul>
-
       <nav class='slider-nav'>
         <ion-icon class='btn prev' name="arrow-back-outline"></ion-icon>
         <ion-icon class='btn next' name="arrow-forward-outline"></ion-icon>
@@ -66,7 +66,6 @@
   </div>
   <div class="section-full" id="magicalGallerySection">
     <div id="firefly-container"></div>
-
     <div class="magical-container" id="magical-cards-container"></div>
   </div>
   <div class="section-full" id="frameSection">
@@ -157,7 +156,8 @@
 
     <div class="grand-reveal hidden" id="grandReveal">
       <canvas id="birthdayCanvas"></canvas>
-      <h1 class="firework-text">Happy Birthday<br>Somu!<br> <i class="fa-solid fa-heart fa-beat" style="color: rgb(107, 0, 0);"></i></h1>
+      <h1 class="firework-text">Happy Birthday<br>Somu!<br> <i class="fa-solid fa-heart fa-beat"
+          style="color: rgb(107, 0, 0);"></i></h1>
     </div>
   </div>
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
