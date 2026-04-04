@@ -220,7 +220,7 @@ html { -ms-overflow-style: none; scrollbar-width: none; }
 @keyframes balloonFloat { 0% { transform: translateY(0) translateX(0) rotate(0deg); } 25% { transform: translateY(-25vh) translateX(20px) rotate(5deg); } 50% { transform: translateY(-50vh) translateX(-20px) rotate(-5deg); } 100% { transform: translateY(-120vh) translateX(0) rotate(0deg); } }
 
 
-#cakeFinaleSection { background-size: 100px 100px; background-position: 0 0, 25px 25px, 50px 50px; background: #FFE6E6; overflow: hidden; position: relative;}
+#cakeFinaleSection { background-size: 100px 100px; background-position: 0 0, 25px 25px, 50px 50px; background: #0000007d;; overflow: hidden; position: relative;}
 .container-desk { position: absolute; display: flex; justify-content: center;align-items: center;margin-top: 134px; top: 0; width: 10rem; height: 10rem; transform: scale(1.2); z-index: 5; transition: opacity 1s ease; }
 .lights { position: absolute; top: -15%; left: -31%; width: 180%; display: flex; justify-content: space-around; z-index: 15; border-top: 2.5px solid #2d3436; border-radius: 50% 50% 0 0 / 15px 15px 0 0; padding-top: 0; }
 
