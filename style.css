@@ -148,8 +148,8 @@ html { -ms-overflow-style: none; scrollbar-width: none; }
 #ground { width: clamp(300px, 90vw, 900px); height: clamp(300px, 90vw, 900px); position: absolute; top: 100%; left: 50%; transform: translate(-50%, -50%) rotateX(90deg); background: radial-gradient(center center, farthest-side, rgba(255, 255, 255, 0.08), transparent); }
 @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 @keyframes spinRevert { from { transform: rotateY(360deg); } to { transform: rotateY(0deg); } }
-@media (max-width: 800px) { #drag-container, #spin-container { scale: 0.75; } }
-@media (max-width: 500px) { #drag-container, #spin-container { scale: 0.55; } #drag-container p { top: 120%; } }
+@media (max-width: 800px) { #drag-container, #spin-container { scale: 0.85; } }
+@media (max-width: 500px) { #drag-container, #spin-container { scale: 0.75; } #drag-container p { top: 120%; } }
 /* ===================== JHOOMAR SECTION ===================== */
 
 #jhoomarSection { position: relative; min-height: 100vh; width: 100%; background: rgba(20, 5, 15, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); overflow-x: hidden; overflow-y: auto; padding: 50px 0; }
