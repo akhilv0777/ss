@@ -1,329 +1,340 @@
+/* ================================================================
+   main.js — Fully Optimized & Reusable
+   Architecture:
+     1. Utils        — Tiny helpers used everywhere
+     2. DOM          — Safe element access
+     3. DragEngine   — Reusable pointer/touch drag logic
+     4. Book         — Flip-book rendering & navigation
+     5. Slider       — Memory slider
+     6. Carousel     — 3D drag carousel
+     7. Spinner      — 3D image spinner
+     8. Jhoomar      — Hanging chandelier
+     9. MagicalGallery — Draggable + flippable cards
+    10. AnimatedFrame — Halo text ring
+    11. MusicPlayer   — Playlist, volume, UI sync
+    12. Clock         — Analog clock hands
+    13. CakeFinale    — Candle blow + fireworks reveal
+    14. Fireflies     — Ambient particles
+    15. BirthdayEffect / FireworkPiece — Canvas fireworks
+    16. RoseOverlay   — Magical rose modal
+    17. Bootstrap     — data.json fetch → init all
+================================================================ */
 
-/* =============================================================
-   GLOBAL STATE
-   Core variables shared across all book and animation logic
-============================================================= */
-let maxPages = 0;
-let currentPage = 1;
-let appData = [];
 
-
-/* =============================================================
-   CONSTANTS
-============================================================= */
-const PI2 = Math.PI * 2;
+/* ================================================================
+   1. UTILS
+================================================================ */
+const PI2    = Math.PI * 2;
 const COLORS = ['#ff7eb3', '#f5c842', '#33ccff', '#ff9933', '#cc33ff'];
-const random = (min, max) => (Math.random() * (max - min + 1) + min) | 0;
-const now = () => new Date().getTime();
+
+const utils = {
+  /** Integer random between min and max (inclusive) */
+  rand: (min, max) => (Math.random() * (max - min + 1) + min) | 0,
+
+  /** Current timestamp in ms */
+  now: () => Date.now(),
+
+  /** Clamp a value between lo and hi */
+  clamp: (val, lo, hi) => Math.max(lo, Math.min(val, hi)),
+
+  /** Pick a random item from an array */
+  pick: arr => arr[Math.floor(Math.random() * arr.length)],
+
+  /** Toggle a CSS class on/off based on a boolean condition */
+  toggleClass: (el, cls, condition) => el?.classList.toggle(cls, condition),
+
+  /** Swap two mutually exclusive CSS classes */
+  swapClass: (el, remove, add) => { el?.classList.remove(remove); el?.classList.add(add); },
+
+  /** Build a DocumentFragment from an array using a mapper fn → HTMLElement */
+  buildFragment: (items, mapper) => {
+    const frag = document.createDocumentFragment();
+    items.forEach(item => frag.appendChild(mapper(item)));
+    return frag;
+  },
+
+  /** Create a single DOM element with optional className and innerHTML */
+  el: (tag, className = '', html = '') => {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    if (html)      e.innerHTML = html;
+    return e;
+  },
+};
 
 
-/* =============================================================
-   DATA LOADER
-   Fetches data.json and initializes all UI sections
-============================================================= */
-fetch('data.json')
-  .then(r => r.json())
-  .then(data => {
-    renderBook(data.book);
-    renderSlider(data.memories);
-    renderCarousel(data.carousel);
-    renderSpinner(data.spinner);
-    renderJhoomar(data.jhoomar);
-    renderMagicalGallery(data.magicalGallery);
-    renderAnimatedFrame(data.animatedFrame);
-    setTimeout(() => {
-      document.getElementById('loader')?.classList.add('hidden');
-      document.querySelector('.book-controls')?.classList.remove('d-none');
-    }, 3000);
-  })
-  .catch(err => console.error('Failed to load data.json:', err));
+/* ================================================================
+   2. DOM — Safe selectors with early-exit helpers
+================================================================ */
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+const byId = id => document.getElementById(id);
 
 
-/* =============================================================
-   BOOK — RENDER & LOGIC (SHORT & OPTIMIZED)
-============================================================= */
-function renderBook(book) {
-  const container = document.getElementById('book');
-  if (!container || !book?.length) return;
+/* ================================================================
+   3. DRAG ENGINE
+   Reusable pointer/touch drag — used by Carousel, Spinner, Gallery
+================================================================ */
 
-  appData = book;
-  maxPages = book.length;
+/**
+ * Attach unified mouse + touch drag listeners to a target element.
+ * @param {Element} target   — element to attach listeners to
+ * @param {object}  handlers — { onStart, onMove, onEnd }
+ *   Each receives a normalised event object: { clientX, clientY, raw }
+ */
+function attachDrag(target, { onStart, onMove, onEnd }) {
+  if (!target) return;
 
-  // Using .map() makes the code shorter and eliminates extra functions
-  container.innerHTML = book.map((p, i) => `
-    <div class="page" id="${p.id}">
-      ${p.isCover ? `
-        <div class="front" id="cover">
-          <h1 class="cover-title">${p.frontContent.title}</h1>
-          <p>${p.frontContent.chapter}</p>
-          <small onclick="goNext()">${p.frontContent.footer}</small>
-        </div>` : `
-        <div class="front">
-          <img src="${p.frontContent.img}" class="photo-frame" loading="lazy">
-          <p>${p.frontContent.text}</p>
-        </div>`}
-      
-      ${p.isCover ? `
-        <div class="back">
-          <h3>${p.backContent.title}</h3>
-          <p>${p.backContent.text}</p>
-          <p class="heart-symbol">${p.backContent.symbol}</p>
-        </div>` :
-      (i === maxPages - 1) ? `
-        <div class="back" id="back-cover">
-          <h2>${p.backContent.title}</h2>
-          <p>${p.backContent.text}</p>
-        </div>` : `
-        <div class="back">
-          <img src="${p.backContent.img}" class="photo-frame" loading="lazy">
-          <p>${p.backContent.text}</p>
-        </div>`}
-    </div>`).join('');
+  const norm = e => ({
+    clientX: e.touches ? e.touches[0].clientX : e.clientX,
+    clientY: e.touches ? e.touches[0].clientY : e.clientY,
+    raw: e,
+  });
 
-  updateBookState(); // Handles z-index, classes, and button hiding
+  const start = e => onStart?.(norm(e));
+  const move  = e => { e.preventDefault(); onMove?.(norm(e)); };
+  const end   = e => onEnd?.(norm(e));
+
+  target.addEventListener('mousedown',  start);
+  target.addEventListener('touchstart', start, { passive: false });
+  target.addEventListener('mousemove',  move);
+  target.addEventListener('touchmove',  move,  { passive: false });
+  target.addEventListener('mouseup',    end);
+  target.addEventListener('touchend',   end);
+  target.addEventListener('mouseleave', end);
 }
 
-/** Handles all state updates: Z-index, Container Classes, and Button Visibility */
-/** Handles all state updates and explicitly hides buttons using display: none */
-/* =============================================================
-   UPDATE BOOK STATE & BUTTON VISIBILITY
-============================================================= */
+
+/* ================================================================
+   4. BOOK
+================================================================ */
+let currentPage = 1;
+let maxPages    = 0;
+let appData     = [];
+
+function renderBook(book) {
+  const container = byId('book');
+  if (!container || !book?.length) return;
+
+  appData   = book;
+  maxPages  = book.length;
+
+  container.innerHTML = book.map((p, i) => {
+    const front = p.isCover
+      ? `<div class="front" id="cover">
+           <h1 class="cover-title">${p.frontContent.title}</h1>
+           <p>${p.frontContent.chapter}</p>
+           <small onclick="goNext()">${p.frontContent.footer}</small>
+         </div>`
+      : `<div class="front">
+           <img src="${p.frontContent.img}" class="photo-frame" loading="lazy">
+           <p>${p.frontContent.text}</p>
+         </div>`;
+
+    const back = p.isCover
+      ? `<div class="back">
+           <h3>${p.backContent.title}</h3>
+           <p>${p.backContent.text}</p>
+           <p class="heart-symbol">${p.backContent.symbol}</p>
+         </div>`
+      : i === maxPages - 1
+        ? `<div class="back" id="back-cover">
+             <h2>${p.backContent.title}</h2>
+             <p>${p.backContent.text}</p>
+           </div>`
+        : `<div class="back">
+             <img src="${p.backContent.img}" class="photo-frame" loading="lazy">
+             <p>${p.backContent.text}</p>
+           </div>`;
+
+    return `<div class="page" id="${p.id}">${front}${back}</div>`;
+  }).join('');
+
+  updateBookState();
+}
+
 function updateBookState() {
-  // 1. Z-Index Update (Pages ka order theek rakhne ke liye)
+  // Z-index
   appData.forEach((p, i) => {
-    const el = document.getElementById(p.id);
+    const el = byId(p.id);
     if (el) el.style.zIndex = (i + 1) < currentPage ? (i + 1) : (maxPages - i + 10);
   });
 
-  // 2. Book Open/Close Animation Classes
-  const cl = document.querySelector('.book-container')?.classList;
+  // Container classes
+  const cl = $('.book-container')?.classList;
   if (cl) {
     cl.toggle('closed-back', currentPage > maxPages);
-    cl.toggle('open-book', currentPage > 1 && currentPage <= maxPages);
+    cl.toggle('open-book',   currentPage > 1 && currentPage <= maxPages);
   }
 
-  // 3. PERFECT BUTTON HIDE/SHOW LOGIC
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-
-  // Agar Page 1 (Front Cover) hai, toh Prev ko 'none' kar do
-  if (prevBtn) {
-    if (currentPage === 1) {
-      prevBtn.style.display = 'none';
-    } else {
-      prevBtn.style.display = 'inline-block';
-    }
-  }
-
-  // Agar Page aakhiri wale se zyada hai (Back Cover), toh Next ko 'none' kar do
-  if (nextBtn) {
-    if (currentPage > maxPages) {
-      nextBtn.style.display = 'none';
-    } else {
-      nextBtn.style.display = 'inline-block';
-    }
-  }
+  // Button visibility
+  const setDisplay = (id, show) => {
+    const btn = byId(id);
+    if (btn) btn.style.display = show ? 'inline-block' : 'none';
+  };
+  setDisplay('prevBtn', currentPage > 1);
+  setDisplay('nextBtn', currentPage <= maxPages);
 }
 
-/** Flips to the next page */
 function goNext() {
   if (currentPage > maxPages) return;
-  document.getElementById(`p${currentPage}`).style.transform = 'rotateY(-180deg)';
+  byId(`p${currentPage}`).style.transform = 'rotateY(-180deg)';
   currentPage++;
   updateBookState();
 }
 
-/** Flips back to the previous page */
 function goPrev() {
   if (currentPage <= 1) return;
   currentPage--;
-  document.getElementById(`p${currentPage}`).style.transform = 'rotateY(0deg)';
+  byId(`p${currentPage}`).style.transform = 'rotateY(0deg)';
   updateBookState();
 }
 
-/* =============================================================
-   SLIDER — RENDER & NAVIGATION
-============================================================= */
 
-/** Populates the memory slider list */
+/* ================================================================
+   5. SLIDER
+================================================================ */
 function renderSlider(memories) {
-  const slider = document.getElementById('sliderList');
+  const slider = byId('sliderList');
   if (!slider || !memories?.length) return;
 
-  const fragment = document.createDocumentFragment();
-  memories.forEach(({ img, title, desc }) => {
-    const li = document.createElement('li');
-    li.className = 'item';
+  slider.appendChild(utils.buildFragment(memories, ({ img, title, desc }) => {
+    const li = utils.el('li', 'item');
     li.style.backgroundImage = `url('${img}')`;
-    li.innerHTML = `
-      <div class="content">
-        <h2 class="title">${title}</h2>
-        <p class="description">${desc}</p>
-      </div>`;
-    fragment.appendChild(li);
-  });
-
-  slider.appendChild(fragment);
+    li.innerHTML = `<div class="content">
+                      <h2 class="title">${title}</h2>
+                      <p class="description">${desc}</p>
+                    </div>`;
+    return li;
+  }));
 }
 
-/** Handles next/prev clicks for the slider via event delegation */
+// Event delegation — one listener for all slider prev/next clicks
 document.addEventListener('click', e => {
-  const slider = document.getElementById('sliderList');
+  const slider = byId('sliderList');
   if (!slider) return;
-
-  const items = document.querySelectorAll('.slider .item');
+  const items = $$('.slider .item');
   if (!items.length) return;
-
   if (e.target.closest('.next')) slider.append(items[0]);
   if (e.target.closest('.prev')) slider.prepend(items[items.length - 1]);
 });
 
 
-/* =============================================================
-   3D CAROUSEL
-============================================================= */
-
-/** Renders carousel items and sets up drag + click interaction */
+/* ================================================================
+   6. 3D CAROUSEL
+================================================================ */
 function renderCarousel(carousel) {
-  const container = document.getElementById('dragCarousel');
+  const container = byId('dragCarousel');
   if (!container || !carousel?.length) return;
 
-  const fragment = document.createDocumentFragment();
-  carousel.forEach(({ img, title, num }) => {
-    const div = document.createElement('div');
-    div.className = 'carousel-item';
-    div.innerHTML = `
-      <div class="carousel-box">
-        <div class="title">${title}</div>
-        <div class="num">${num}</div>
-        ${img ? `<img src="${img}" loading="lazy">` : ''}
-      </div>`;
-    fragment.appendChild(div);
-  });
+  container.appendChild(utils.buildFragment(carousel, ({ img, title, num }) => {
+    const div = utils.el('div', 'carousel-item');
+    div.innerHTML = `<div class="carousel-box">
+                       <div class="title">${title}</div>
+                       <div class="num">${num}</div>
+                       ${img ? `<img src="${img}" loading="lazy">` : ''}
+                     </div>`;
+    return div;
+  }));
 
-  container.appendChild(fragment);
   initCarousel();
 }
 
-/** Initializes 3D carousel drag and click interactions */
 function initCarousel() {
-  let progress = 50, startX = 0, activeIndex = 0, isDragging = false;
-
-  const items = document.querySelectorAll('.carousel-item');
-  const section = document.getElementById('carouselSection');
+  let progress = 50, activeIndex = 0;
+  const items   = $$('.carousel-item');
+  const section = byId('carouselSection');
   if (!items.length || !section) return;
 
   const update = () => {
-    progress = Math.max(0, Math.min(progress, 100));
+    progress    = utils.clamp(progress, 0, 100);
     activeIndex = Math.floor(progress / 100 * (items.length - 1));
     items.forEach((item, i) => {
-      const z = i === activeIndex ? items.length : items.length - Math.abs(activeIndex - i);
-      item.style.setProperty('--zIndex', z);
+      item.style.setProperty('--zIndex',  i === activeIndex ? items.length : items.length - Math.abs(activeIndex - i));
       item.style.setProperty('--active', (i - activeIndex) / items.length);
     });
   };
   update();
 
-  // Click on item to bring it to focus
-  items.forEach((item, i) => {
-    item.addEventListener('click', () => { progress = (i / items.length) * 100 + 10; update(); });
+  items.forEach((item, i) =>
+    item.addEventListener('click', () => { progress = (i / items.length) * 100 + 10; update(); })
+  );
+
+  let startX = 0;
+  attachDrag(section, {
+    onStart: ({ clientX }) => { startX = clientX; },
+    onMove:  ({ clientX }) => { progress += (clientX - startX) * -0.1; startX = clientX; update(); },
   });
-
-  const handleMove = x => {
-    if (!isDragging) return;
-    progress += (x - startX) * -0.1;
-    startX = x;
-    update();
-  };
-
-  // Mouse events
-  section.addEventListener('mousedown', e => { isDragging = true; startX = e.clientX; });
-  section.addEventListener('mousemove', e => handleMove(e.clientX));
-  section.addEventListener('mouseup', () => isDragging = false);
-  section.addEventListener('mouseleave', () => isDragging = false);
-
-  // Touch events
-  section.addEventListener('touchstart', e => { isDragging = true; startX = e.touches[0].clientX; });
-  section.addEventListener('touchmove', e => handleMove(e.touches[0].clientX));
-  section.addEventListener('touchend', () => isDragging = false);
 }
 
 
-/* =============================================================
-   3D SPINNER
-============================================================= */
-
-/** Renders spinner images and initializes the 3D rotation */
+/* ================================================================
+   7. 3D SPINNER
+================================================================ */
 function renderSpinner(spinner) {
-  const container = document.getElementById('spin-container');
+  const container = byId('spin-container');
   if (!container || !spinner?.length) return;
 
   const pTag = container.querySelector('p');
-  const fragment = document.createDocumentFragment();
+  container.insertBefore(
+    utils.buildFragment(spinner, ({ img }) => {
+      const imgEl = utils.el('img');
+      imgEl.src     = img;
+      imgEl.loading = 'lazy';
+      return imgEl;
+    }),
+    pTag
+  );
 
-  spinner.forEach(({ img }) => {
-    const imgEl = document.createElement('img');
-    imgEl.src = img;
-    imgEl.loading = 'lazy';
-    fragment.appendChild(imgEl);
-  });
-
-  container.insertBefore(fragment, pTag);
   initSpinner();
 }
 
-/** Initializes the draggable 3D image spinner */
 function initSpinner() {
-  const imgW = 120, imgH = 170, radius = 240, rotateSpeed = -60;
+  const IMG_W = 120, IMG_H = 170, RADIUS = 240, SPIN_SPEED = -60;
 
-  const spinContainer = document.getElementById('spin-container');
-  const dragContainer = document.getElementById('drag-container');
-  const spinSection = document.getElementById('spinSection');
-  const images = spinContainer?.getElementsByTagName('img');
-
+  const spinContainer = byId('spin-container');
+  const dragContainer = byId('drag-container');
+  const spinSection   = byId('spinSection');
+  const images        = spinContainer?.getElementsByTagName('img');
   if (!images?.length) return;
 
-  spinContainer.style.width = `${imgW}px`;
-  spinContainer.style.height = `${imgH}px`;
+  spinContainer.style.width  = `${IMG_W}px`;
+  spinContainer.style.height = `${IMG_H}px`;
 
-  // Arrange images in a circle after a brief delay
+  // Arrange images in a circle
   const arrange = (delay) => {
     Array.from(images).forEach((img, i) => {
-      img.style.transform = `rotateY(${i * (360 / images.length)}deg) translateZ(${radius}px)`;
-      img.style.transition = 'transform 1s';
+      img.style.transform      = `rotateY(${i * (360 / images.length)}deg) translateZ(${RADIUS}px)`;
+      img.style.transition     = 'transform 1s';
       img.style.transitionDelay = delay ?? `${(images.length - i) / 4}s`;
     });
   };
   setTimeout(arrange, 1000);
 
-  spinContainer.style.animation = `${rotateSpeed > 0 ? 'spin' : 'spinRevert'} ${Math.abs(rotateSpeed)}s infinite linear`;
+  spinContainer.style.animation = `${SPIN_SPEED > 0 ? 'spin' : 'spinRevert'} ${Math.abs(SPIN_SPEED)}s infinite linear`;
 
-  // Drag state
-  let sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
+  let tX = 0, tY = 10, desX = 0, desY = 0, sX, sY;
 
   const applyTransform = () => {
-    tY = Math.max(0, Math.min(tY, 180));
+    tY = utils.clamp(tY, 0, 180);
     dragContainer.style.transform = `rotateX(${-tY}deg) rotateY(${tX}deg)`;
   };
 
-  spinSection.addEventListener('pointerdown', function (e) {
-    clearInterval(dragContainer.timer);
-    sX = e.clientX;
-    sY = e.clientY;
-
-    this.onpointermove = e => {
-      nX = e.clientX; nY = e.clientY;
-      desX = nX - sX; desY = nY - sY;
-      tX += desX * 0.1; tY += desY * 0.1;
+  attachDrag(spinSection, {
+    onStart: ({ clientX, clientY }) => {
+      clearInterval(dragContainer.timer);
+      sX = clientX; sY = clientY;
+    },
+    onMove: ({ clientX, clientY }) => {
+      desX = clientX - sX; desY = clientY - sY;
+      tX += desX * 0.1;   tY += desY * 0.1;
       applyTransform();
-      sX = nX; sY = nY;
-    };
-
-    // On release, apply inertia and gradually slow down
-    this.onpointerup = () => {
+      sX = clientX; sY = clientY;
+    },
+    onEnd: () => {
       dragContainer.timer = setInterval(() => {
         desX *= 0.95; desY *= 0.95;
-        tX += desX * 0.1; tY += desY * 0.1;
+        tX   += desX * 0.1; tY += desY * 0.1;
         applyTransform();
         spinContainer.style.animationPlayState = 'paused';
 
@@ -332,83 +343,72 @@ function initSpinner() {
           spinContainer.style.animationPlayState = 'running';
         }
       }, 17);
-      this.onpointermove = this.onpointerup = null;
-    };
+    },
   });
 }
 
 
-/* =============================================================
-   HEART DHANUSH (MULTI-LAYERED JHOOMAR) LOGIC
-============================================================= */
+/* ================================================================
+   8. JHOOMAR (CHANDELIER)
+================================================================ */
 function renderJhoomar(items) {
-  const container = document.getElementById('jhoomar-container');
+  const container = byId('jhoomar-container');
   if (!container || !items?.length) return;
-  const screenWidth = window.innerWidth;
-  let maxPerRow = 9;
-  if (screenWidth < 600) maxPerRow = 4;
-  else if (screenWidth < 900) maxPerRow = 6;
+
+  const w = window.innerWidth;
+  const maxPerRow = w < 600 ? 4 : w < 900 ? 6 : 9;
 
   let html = '';
   for (let i = 0; i < items.length; i += maxPerRow) {
-    const rowItems = items.slice(i, i + maxPerRow);
-    const n = rowItems.length;
+    const row = items.slice(i, i + maxPerRow);
+    const n   = row.length;
+    const mid = Math.max((n - 1) / 2, 1);
 
-    html += `<div class="jhoomar-row">`;
-
-    rowItems.forEach(({ img }, j) => {
-      const centerIndex = Math.max((n - 1) / 2, 1);
-      const normalizedDistance = (j - centerIndex) / centerIndex;
-      const stringHeight = 40 + (90 * (normalizedDistance * normalizedDistance));
-      const animDuration = (2.5 + Math.random() * 1.5).toFixed(1) + 's';
-      const animDelay = (Math.random() * 1).toFixed(1) + 's';
-
-      html += `
-        <div class="jhoomar-item" style="animation: swing ${animDuration} ease-in-out ${animDelay} infinite alternate;">
-          <div class="string" style="height: ${stringHeight}px"></div>
-          <div class="heart-frame">
-            <img src="${img}" class="hanging-img" loading="lazy">
-          </div>
-        </div>
-      `;
-    });
-
-    html += `</div>`; // Line khatam
+    html += `<div class="jhoomar-row">` +
+      row.map(({ img }, j) => {
+        const dist    = (j - mid) / mid;
+        const strH    = 40 + 90 * (dist * dist);
+        const dur     = (2.5 + Math.random() * 1.5).toFixed(1) + 's';
+        const delay   = (Math.random()).toFixed(1) + 's';
+        return `
+          <div class="jhoomar-item" style="animation:swing ${dur} ease-in-out ${delay} infinite alternate;">
+            <div class="string" style="height:${strH}px"></div>
+            <div class="heart-frame">
+              <img src="${img}" class="hanging-img" loading="lazy">
+            </div>
+          </div>`;
+      }).join('') +
+    `</div>`;
   }
 
   container.innerHTML = html;
 }
 
-/* =============================================================
-   MAGICAL GALLERY (DRAGGABLE & FLIPPABLE CARDS)
-============================================================= */
+
+/* ================================================================
+   9. MAGICAL GALLERY
+================================================================ */
 function renderMagicalGallery(gallery) {
-  const container = document.getElementById('magical-cards-container');
+  const container = byId('magical-cards-container');
   if (!container || !gallery?.length) return;
 
   container.innerHTML = gallery.map(({ id, isMain, type, src, frontNote, backNote }) => {
     const sizeClass = isMain ? 'card-video' : 'card-photo';
-    const media = type === 'video'
+    const media     = type === 'video'
       ? `<div class="drag-handle"></div><video src="${src}" controls playsinline></video>`
       : `<img src="${src}" loading="lazy">`;
-
-    // MAGIC: Back cover par wahi same photo background ban kar aayegi
-    const backStyle = `background-image: url('${src}');`;
 
     return `
       <div class="magical-card ${sizeClass}" id="${id}">
         <div class="card-inner">
-          
           <div class="card-front">
             ${media}
             <div class="card-note">${frontNote}<span class="tap-hint">(Tap to flip)</span></div>
           </div>
-          
-          <div class="card-back" style="${backStyle}">
+          <div class="card-back" style="background-image:url('${src}');">
             <div class="back-overlay"></div>
             <div class="back-note">${backNote}</div>
           </div>
-          
         </div>
       </div>`;
   }).join('');
@@ -416,360 +416,247 @@ function renderMagicalGallery(gallery) {
   initMagicalGallery();
 }
 
-// Ensure initMagicalGallery() remains exactly as it was.
-
-/** Adds drag-to-move and tap-to-flip behavior to each card */
 function initMagicalGallery() {
-  const cards = document.querySelectorAll('.magical-card');
   let topZ = 100;
 
-  cards.forEach(card => {
+  $$('.magical-card').forEach(card => {
     const isVideo = card.classList.contains('card-video');
-    const range = isVideo ? 0 : 120;
+    const range   = isVideo ? 0 : 120;
 
-    // Random initial position and rotation (video stays centered)
-    let offsetX = (Math.random() - 0.5) * range * 2;
-    let offsetY = (Math.random() - 0.5) * range * 2;
-    let rotation = isVideo ? 0 : (Math.random() - 0.5) * 30;
+    let offsetX  = (Math.random() - 0.5) * range * 2;
+    let offsetY  = (Math.random() - 0.5) * range * 2;
+    const rotate = isVideo ? 0 : (Math.random() - 0.5) * 30;
 
-    card.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotate(${rotation}deg)`;
+    const applyPos = (extra = '') =>
+      card.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotate(${rotate}deg)${extra}`;
 
-    let isDragging = false, startX, startY;
-    let moveDistance = 0, startTime = 0;
+    applyPos();
 
-    const startDrag = e => {
-      // Let the browser handle native video controls
-      if (e.target.tagName.toLowerCase() === 'video') return;
+    let startX, startY, moved = 0, startTime = 0;
 
-      isDragging = true;
-      moveDistance = 0;
-      startTime = Date.now();
+    attachDrag(card, {
+      onStart: ({ clientX, clientY, raw }) => {
+        if (raw.target.tagName.toLowerCase() === 'video') return;
+        moved     = 0;
+        startTime = Date.now();
+        card.style.zIndex      = ++topZ;
+        card.style.transition  = 'none';
+        startX = clientX; startY = clientY;
+      },
+      onMove: ({ clientX, clientY }) => {
+        moved   += Math.abs(clientX - startX) + Math.abs(clientY - startY);
+        offsetX += clientX - startX;
+        offsetY += clientY - startY;
 
-      // Bring this card to the front
-      card.style.zIndex = ++topZ;
-      card.style.transition = 'none';
+        const tiltX = (clientY - startY) * -0.5;
+        const tiltY = (clientX - startX) *  0.5;
+        applyPos(` rotateX(${tiltX}deg) rotateY(${tiltY}deg)`);
 
-      startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-      startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-
-      document.addEventListener('mousemove', onDrag);
-      document.addEventListener('touchmove', onDrag, { passive: false });
-      document.addEventListener('mouseup', endDrag);
-      document.addEventListener('touchend', endDrag);
-    };
-
-    const onDrag = e => {
-      if (!isDragging) return;
-      e.preventDefault();
-
-      const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-      const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-
-      moveDistance += Math.abs(clientX - startX) + Math.abs(clientY - startY);
-      offsetX += clientX - startX;
-      offsetY += clientY - startY;
-
-      // Slight tilt in the direction of drag
-      const tiltX = (clientY - startY) * -0.5;
-      const tiltY = (clientX - startX) * 0.5;
-
-      card.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotate(${rotation}deg) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-
-      startX = clientX;
-      startY = clientY;
-    };
-
-    const endDrag = () => {
-      if (!isDragging) return;
-      isDragging = false;
-
-      const elapsed = Date.now() - startTime;
-
-      // Snap back to flat rotation after drag
-      card.style.transition = 'transform 0.5s ease-out';
-      card.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotate(${rotation}deg)`;
-
-      document.removeEventListener('mousemove', onDrag);
-      document.removeEventListener('touchmove', onDrag);
-      document.removeEventListener('mouseup', endDrag);
-      document.removeEventListener('touchend', endDrag);
-
-      // Short tap with minimal movement = flip the card
-      if (elapsed < 300 && moveDistance < 20) card.classList.toggle('flipped');
-    };
-
-    card.addEventListener('mousedown', startDrag);
-    card.addEventListener('touchstart', startDrag);
+        startX = clientX; startY = clientY;
+      },
+      onEnd: () => {
+        card.style.transition = 'transform 0.5s ease-out';
+        applyPos();
+        // Short tap with minimal movement = flip
+        if (Date.now() - startTime < 300 && moved < 20)
+          card.classList.toggle('flipped');
+      },
+    });
   });
 }
 
 
-/* =============================================================
-   ANIMATED HALO TEXT FRAME LOGIC (Fixed Circle & Smooth Zoom)
-============================================================= */
+/* ================================================================
+   10. ANIMATED HALO TEXT FRAME
+================================================================ */
 function renderAnimatedFrame({ img, text } = {}) {
-  const bg = document.getElementById('frameBg');
-  const textContainer = document.getElementById('dynamicTextContainer');
+  const bg            = byId('frameBg');
+  const textContainer = byId('dynamicTextContainer');
   if (!bg || !textContainer || !text) return;
 
-  // Photo ab inner background par set hogi
-  bg.style.background = `url('${img}') no-repeat center`;
+  bg.style.background     = `url('${img}') no-repeat center`;
   bg.style.backgroundSize = 'cover';
 
-  // Text ko bada karke repeat karna taaki poora ghera ban jaye
-  const fullText = (text + " • ").repeat(4);
-  const chars = fullText.split('');
-  const deg = 360 / chars.length;
-
-  textContainer.innerHTML = chars.map((char, i) =>
-    `<span style="transform: rotate(${i * deg}deg) translateY(calc(var(--size) * -0.65));">${char}</span>`
+  const chars   = (text + ' • ').repeat(4).split('');
+  const deg     = 360 / chars.length;
+  textContainer.innerHTML = chars.map((ch, i) =>
+    `<span style="transform:rotate(${i * deg}deg) translateY(calc(var(--size) * -0.65));">${ch}</span>`
   ).join('');
 }
 
-/* =============================================================
-   BACKGROUND MUSIC
-   Deferred autoplay on first user interaction (browser policy)
-============================================================= */
-document.body.addEventListener('click', () => {
-  const music = document.getElementById('bgMusic');
-  if (music?.paused) music.play().catch(console.warn);
-}, { once: true });
 
-(async function () {
-  const audio = document.querySelector("#bgMusic");
-  const playBtn3D = document.querySelector("#mp-btn-3d-play");
-  const playBtnPanel = document.querySelector("#mp-btn-play-pause");
-  const playIcon = document.querySelector("#mp-play-icon");
-  const cas = document.querySelector("#mp-cas");
-  const tsh = document.querySelector("#mp-tsh");
-  const lgh = document.querySelector("#mp-lgh");
-  const saumyaImgElement = document.querySelector("#saumya-popup img");
-  const saumyaPopup = document.querySelector("#saumya-popup");
-  const fileUpload = document.getElementById("mp-file-upload");
-  const prevBtn = document.getElementById("mp-btn-prev");
-  const nextBtn = document.getElementById("mp-btn-next");
-  const volumeRadios = document.querySelectorAll('#music-player-section input[name="switch"]');
-  
-  // Variables jo JSON se data aane ke baad bharenge
-  let saumyaImages = [];
-  let playlist = [];
-  let currentSongIndex = 0;
+/* ================================================================
+   11. MUSIC PLAYER
+================================================================ */
+async function initMusicPlayer() {
+  const audio        = $('#bgMusic');
+  const playBtn3D    = $('#mp-btn-3d-play');
+  const playBtnPanel = $('#mp-btn-play-pause');
+  const playIcon     = $('#mp-play-icon');
+  const cas          = $('#mp-cas');
+  const tsh          = $('#mp-tsh');
+  const lgh          = $('#mp-lgh');
+  const saumyaImg    = $('#saumya-popup img');
+  const saumyaPopup  = $('#saumya-popup');
+  const fileUpload   = byId('mp-file-upload');
+  const prevBtn      = byId('mp-btn-prev');
+  const nextBtn      = byId('mp-btn-next');
+  const volumeRadios = $$('#music-player-section input[name="switch"]');
 
-  // JSON Data Fetch Karne Ka Logic
+  let saumyaImages = [], playlist = [], currentIndex = 0;
+
+  // ── Load data ──────────────────────────────────────────────
   try {
-    const response = await fetch('./data.json');
-    const data = await response.json();
-    
-    saumyaImages = data.saumyaImages;
-    playlist = data.musicList; // Playlist ab objects ki array hai: {name, src}
-
-    if (audio && playlist.length > 0) {
-      audio.src = playlist[currentSongIndex].src;
+    const data  = await fetch('./data.json').then(r => r.json());
+    saumyaImages = data.saumyaImages || [];
+    playlist     = data.musicList    || [];
+    if (audio && playlist.length) {
+      audio.src  = playlist[0].src;
+      audio.loop = playlist.length === 1; // single song → loop
     }
-  } catch (error) {
-    console.error("Data load karne mein error aayi:", error);
-  }
+  } catch (e) { console.error('Music player data load failed:', e); }
 
-  if (audio) {
-    audio.addEventListener('error', (e) => {
-      console.error("Audio Load Error: File not found or format not supported.");
-    });
-  }
+  audio?.addEventListener('error', () =>
+    console.error('Audio error: file not found or unsupported format.'));
+
+  // ── UI state helpers ───────────────────────────────────────
+  const setLoopMode = () => { if (audio) audio.loop = playlist.length === 1; };
+
+  const setUI = (playing) => {
+    cas.classList.toggle('is-radio-playing', playing);
+    tsh.classList.toggle('is-tape-close',    playing);
+    playBtn3D.classList.toggle('is-button-pressed', playing);
+
+    if (playing) setTimeout(() => lgh.classList.add('is-wave-playing'), 1000);
+    else lgh.classList.remove('is-wave-playing');
+
+    utils.swapClass(playIcon, playing ? 'fa-play' : 'fa-pause', playing ? 'fa-pause' : 'fa-play');
+
+    if (saumyaPopup) {
+      if (playing && saumyaImages.length) {
+        saumyaImg.src = utils.pick(saumyaImages);
+        saumyaPopup.classList.add('show');
+      } else {
+        saumyaPopup.classList.remove('show');
+      }
+    }
+  };
 
   const safePlay = async () => {
     if (!audio) return;
-    cas.classList.add("is-radio-playing");
-    tsh.classList.add("is-tape-close");
-    playBtn3D.classList.add("is-button-pressed");
-    setTimeout(() => lgh.classList.add("is-wave-playing"), 1000);
-    playIcon.classList.replace("fa-play", "fa-pause");
-
-    // ✨ Har baar play hone par nayi (random) image set karna ✨
-    if (saumyaPopup && saumyaImgElement && saumyaImages.length > 0) {
-      const randomImg = saumyaImages[Math.floor(Math.random() * saumyaImages.length)];
-      saumyaImgElement.src = randomImg;
-      saumyaPopup.classList.add("show");
-    }
-
-    try {
-      await audio.play();
-    } catch (error) {
-      cas.classList.remove("is-radio-playing");
-      tsh.classList.remove("is-tape-close");
-      playBtn3D.classList.remove("is-button-pressed");
-      lgh.classList.remove("is-wave-playing");
-      playIcon.classList.replace("fa-pause", "fa-play");
-
-      if (saumyaPopup) saumyaPopup.classList.remove("show");
-    }
+    setUI(true);
+    try { await audio.play(); }
+    catch { setUI(false); }
   };
 
-  const togglePlayPause = () => {
-    if (!audio || playlist.length === 0) return;
-
-    if (audio.paused) {
-      safePlay();
-    } else {
-      cas.classList.remove("is-radio-playing");
-      tsh.classList.remove("is-tape-close");
-      playBtn3D.classList.remove("is-button-pressed");
-      lgh.classList.remove("is-wave-playing");
-      playIcon.classList.replace("fa-pause", "fa-play");
-
-      // ✨ Hide Saumya's Image on Pause ✨
-      if (saumyaPopup) saumyaPopup.classList.remove("show");
-
-      audio.pause();
-    }
+  const toggle = () => {
+    if (!audio || !playlist.length) return;
+    audio.paused ? safePlay() : (setUI(false), audio.pause());
   };
 
-  playBtn3D.addEventListener("click", togglePlayPause);
-  playBtnPanel.addEventListener("click", togglePlayPause);
+  // ── Song change ────────────────────────────────────────────
+  const changeSong = (dir) => {
+    if (!audio || playlist.length <= 1) return;
+    saumyaPopup?.classList.remove('show');
+    currentIndex = dir === 'next'
+      ? (currentIndex + 1) % playlist.length
+      : (currentIndex - 1 + playlist.length) % playlist.length;
+    audio.src = playlist[currentIndex].src;
+    setTimeout(safePlay, 400);
+  };
 
-  // File upload feature update kiya gaya taaki yeh object {name, src} format support kare
-  fileUpload.addEventListener('change', (e) => {
-    const files = e.target.files;
-    if (files.length > 0 && audio) {
-      playlist = [];
-      for (let i = 0; i < files.length; i++) {
-        playlist.push({
-          name: files[i].name,
-          src: URL.createObjectURL(files[i])
-        });
-      }
-      currentSongIndex = 0;
-      audio.src = playlist[currentSongIndex].src;
-      safePlay();
-    }
+  // ── Events ─────────────────────────────────────────────────
+  playBtn3D?.addEventListener('click', toggle);
+  playBtnPanel?.addEventListener('click', toggle);
+  prevBtn?.addEventListener('click', () => changeSong('prev'));
+  nextBtn?.addEventListener('click', () => changeSong('next'));
+  audio?.addEventListener('ended', () => changeSong('next')); // fires only when loop=false
+
+  fileUpload?.addEventListener('change', ({ target: { files } }) => {
+    if (!files.length || !audio) return;
+    playlist      = Array.from(files).map(f => ({ name: f.name, src: URL.createObjectURL(f) }));
+    currentIndex  = 0;
+    audio.src     = playlist[0].src;
+    setLoopMode();
+    safePlay();
   });
 
-  const changeSong = (direction) => {
-    if (!audio || playlist.length === 0) return;
+  // Volume map — switch_off → 0, switch_1 → 0.2 … switch_5 → 1.0
+  const VOL_MAP = { switch_off: 0, switch_1: 0.2, switch_2: 0.4, switch_3: 0.6, switch_4: 0.8, switch_5: 1.0 };
+  volumeRadios.forEach(r =>
+    r.addEventListener('change', ({ target }) => { if (audio) audio.volume = VOL_MAP[target.id] ?? 1; })
+  );
 
-    // ✨ Bounce effect: Hide image briefly when changing song ✨
-    if (saumyaPopup) saumyaPopup.classList.remove("show");
-
-    if (direction === 'next') {
-      currentSongIndex = (currentSongIndex + 1) % playlist.length;
-    } else {
-      currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-    }
-    
-    // .src lagana zaroori hai kyunki ab playlist mein objects hain
-    audio.src = playlist[currentSongIndex].src;
-
-    // Show image again after a short delay to create a bounce effect
-    setTimeout(() => {
-      safePlay();
-    }, 400);
-  };
-
-  prevBtn.addEventListener('click', () => changeSong('prev'));
-  nextBtn.addEventListener('click', () => changeSong('next'));
-  if (audio) audio.addEventListener('ended', () => changeSong('next'));
-
-  volumeRadios.forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      if (!audio) return;
-      let vol = 1.0;
-      if (e.target.id === 'switch_off') vol = 0.0;
-      if (e.target.id === 'switch_1') vol = 0.2;
-      if (e.target.id === 'switch_2') vol = 0.4;
-      if (e.target.id === 'switch_3') vol = 0.6;
-      if (e.target.id === 'switch_4') vol = 0.8;
-      if (e.target.id === 'switch_5') vol = 1.0;
-      audio.volume = vol;
-    });
-  });
-})();
-
-/* =============================================================
-   FIREFLIES (OPTIONAL)
-============================================================= */
-
-/** Creates ambient firefly elements in the firefly container */
-function createFireflies() {
-  const container = document.getElementById('firefly-container');
-  if (!container) return;
-
-  const fragment = document.createDocumentFragment();
-  for (let i = 0; i < 30; i++) {
-    const el = document.createElement('div');
-    el.className = 'firefly';
-    el.style.left = `${Math.random() * 100}vw`;
-    el.style.animationDuration = `${Math.random() * 5 + 5}s`;
-    el.style.animationDelay = `${Math.random() * 5}s`;
-    fragment.appendChild(el);
-  }
-  container.appendChild(fragment);
+  // Deferred autoplay on first interaction
+  document.body.addEventListener('click', () => {
+    if (audio?.paused) audio.play().catch(() => {});
+  }, { once: true });
 }
 
 
-// Clock Logic
-const hour = document.getElementById('hour');
-const minute = document.getElementById('minute');
-const second = document.getElementById('second');
+/* ================================================================
+   12. CLOCK
+================================================================ */
+function initClock() {
+  const hour   = byId('hour');
+  const minute = byId('minute');
+  const second = byId('second');
+  if (!hour || !minute || !second) return;
 
-if (hour && minute && second) {
-  setInterval(() => {
-    const todayDate = new Date();
-    const hRotation = 30 * todayDate.getHours() + todayDate.getMinutes() / 2;
-    const mRotation = 6 * todayDate.getMinutes();
-    const sRotation = 6 * todayDate.getSeconds();
-
-    hour.style.transform = `rotate(${hRotation}deg)`;
-    minute.style.transform = `rotate(${mRotation}deg)`;
-    second.style.transform = `rotate(${sRotation}deg)`;
-  }, 1000);
+  const tick = () => {
+    const d = new Date();
+    hour.style.transform   = `rotate(${30 * d.getHours() + d.getMinutes() / 2}deg)`;
+    minute.style.transform = `rotate(${6  * d.getMinutes()}deg)`;
+    second.style.transform = `rotate(${6  * d.getSeconds()}deg)`;
+  };
+  tick();
+  setInterval(tick, 1000);
 }
 
+
+/* ================================================================
+   13. CAKE FINALE — CANDLE BLOW + CANVAS FIREWORKS
+================================================================ */
 let isDeskBlown = false;
 
 function blowCandleAndReveal() {
   if (isDeskBlown) return;
 
-  let containerDesk = document.getElementById('mainContainerDesk');
-  let flame = document.getElementById('flame');
-  let tapText = document.getElementById('tap-text');
-  let cake = document.getElementById('cake');
-  let revealCanvas = document.getElementById('grandReveal');
-  let section = document.getElementById('cakeFinaleSection');
+  const desk    = byId('mainContainerDesk');
+  const flame   = byId('flame');
+  const tapText = byId('tap-text');
+  const cake    = byId('cake');
+  const canvas  = byId('grandReveal');
+  const section = byId('cakeFinaleSection');
 
-  // Ladki aage jhukegi
-  if (containerDesk) containerDesk.classList.add('blowing');
+  desk?.classList.add('blowing');
   if (tapText) tapText.style.opacity = '0';
 
   setTimeout(() => {
-    // 1. Aag bujhegi
     if (flame) flame.style.display = 'none';
     isDeskBlown = true;
     if (cake) cake.style.cursor = 'default';
 
     setTimeout(() => {
-      // 2. Ladki wapas peeche hogi
-      if (containerDesk) containerDesk.classList.remove('blowing');
+      desk?.classList.remove('blowing');
 
-      // 3. Desk ko gayab karo aur background dark karo
       setTimeout(() => {
-        if (containerDesk) containerDesk.style.opacity = '0';
+        if (desk)    desk.style.opacity = '0';
         if (section) section.style.background = '#0a0a0a';
 
-        // 4. Grand Canvas Reveal chalu karo!
         setTimeout(() => {
-          if (revealCanvas) revealCanvas.classList.remove('hidden');
+          canvas?.classList.remove('hidden');
 
-          // START THE FIREWORKS LOOP (TIMESTAMP ERROR FIXED)
           if (typeof BirthdayEffect !== 'undefined') {
-            let birthdayAnim = new BirthdayEffect();
-            let then = Date.now(); // <-- Yahan theek kiya
-
-            (function loop() {
+            const fx   = new BirthdayEffect();
+            let then   = Date.now();
+            const loop = () => {
               requestAnimationFrame(loop);
-              let currentTime = Date.now(); // <-- Yahan theek kiya
-              let delta = currentTime - then;
-              then = currentTime;
-              birthdayAnim.update(delta / 1000);
-            })();
+              const now   = Date.now();
+              fx.update((now - then) / 1000);
+              then = now;
+            };
+            loop();
           }
         }, 800);
       }, 800);
@@ -777,106 +664,105 @@ function blowCandleAndReveal() {
   }, 500);
 }
 
-
-/* =============================================================
-   DOM FIREWORK BURST — CSS PARTICLE EXPLOSION
-============================================================= */
-
-/** Creates a single burst of CSS-animated particles at a random position */
+/* DOM firework burst (CSS particles) */
 function createFireworkBurst() {
-  const container = document.getElementById('fireworks-container');
+  const container = byId('fireworks-container');
   if (!container) return;
 
   const palette = [...COLORS, '#fff', '#ff3366'];
-  const originX = 10 + Math.random() * 80; // % from left
-  const originY = 10 + Math.random() * 60; // % from top
+  const ox = 10 + Math.random() * 80;
+  const oy = 10 + Math.random() * 60;
 
-  const fragment = document.createDocumentFragment();
-
+  const frag = document.createDocumentFragment();
   for (let i = 0; i < 60; i++) {
-    const p = document.createElement('div');
-    p.className = 'fw-particle';
-    p.style.backgroundColor = palette[Math.floor(Math.random() * palette.length)];
-    p.style.left = `${originX}vw`;
-    p.style.top = `${originY}vh`;
-
+    const p     = utils.el('div', 'fw-particle');
     const angle = Math.random() * PI2;
-    const distance = Math.random() * 200 + 50;
-    p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
-    p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+    const dist  = Math.random() * 200 + 50;
+    p.style.backgroundColor = utils.pick(palette);
+    p.style.left            = `${ox}vw`;
+    p.style.top             = `${oy}vh`;
+    p.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+    p.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
     p.style.animationDuration = `${Math.random() * 0.8 + 0.8}s`;
-
-    fragment.appendChild(p);
-
-    // Auto-clean particle from DOM after animation ends
+    frag.appendChild(p);
     setTimeout(() => p.remove(), 2000);
   }
-
-  container.appendChild(fragment);
+  container.appendChild(frag);
 }
 
 
-/* =============================================================
-   CANVAS FIREWORKS — BIRTHDAY EFFECT
-   Continuous particle-based firework animation on a canvas
-============================================================= */
+/* ================================================================
+   14. FIREFLIES
+================================================================ */
+function createFireflies() {
+  const container = byId('firefly-container');
+  if (!container) return;
 
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 30; i++) {
+    const el = utils.el('div', 'firefly');
+    el.style.left              = `${Math.random() * 100}vw`;
+    el.style.animationDuration = `${Math.random() * 5 + 5}s`;
+    el.style.animationDelay    = `${Math.random() * 5}s`;
+    frag.appendChild(el);
+  }
+  container.appendChild(frag);
+}
+
+
+/* ================================================================
+   15. CANVAS FIREWORKS — Birthday Effect
+================================================================ */
 class BirthdayEffect {
   constructor() {
-    this.canvas = document.getElementById('birthdayCanvas');
-    this.ctx = this.canvas.getContext('2d');
+    this.canvas    = byId('birthdayCanvas');
+    this.ctx       = this.canvas.getContext('2d');
     this.fireworks = [];
-    this.counter = 0;
+    this.counter   = 0;
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
 
-  /** Resizes canvas and recalculates spawn zones */
   resize() {
-    this.width = this.canvas.width = window.innerWidth;
+    this.width  = this.canvas.width  = window.innerWidth;
     this.height = this.canvas.height = window.innerHeight;
-    const center = (this.width / 2) | 0;
-    this.spawnA = (center - center / 4) | 0;
-    this.spawnB = (center + center / 4) | 0;
+    const cx    = (this.width / 2) | 0;
+    this.spawnA = (cx - cx / 4) | 0;
+    this.spawnB = (cx + cx / 4) | 0;
     this.spawnC = this.height * 0.1;
     this.spawnD = this.height * 0.5;
   }
 
-  /** Called each animation frame — clears canvas and updates all particles */
   update(delta) {
-    this.ctx.globalCompositeOperation = 'hard-light';
-    this.ctx.fillStyle = `rgba(20,20,20,${7 * delta})`;
-    this.ctx.fillRect(0, 0, this.width, this.height);
+    const { ctx } = this;
+    ctx.globalCompositeOperation = 'hard-light';
+    ctx.fillStyle = `rgba(20,20,20,${7 * delta})`;
+    ctx.fillRect(0, 0, this.width, this.height);
+    ctx.globalCompositeOperation = 'lighter';
 
-    this.ctx.globalCompositeOperation = 'lighter';
-    this.fireworks.forEach(fw => fw.draw(this.ctx, delta, this));
+    this.fireworks.forEach(fw => fw.draw(ctx, delta, this));
 
-    // Spawn a new firework every frame cycle
     this.counter += delta * 3;
     if (this.counter >= 1) {
       this.fireworks.push(new FireworkPiece(
-        random(this.spawnA, this.spawnB), this.height,
-        random(0, this.width), random(this.spawnC, this.spawnD),
-        random(0, 360), random(30, 110)
+        utils.rand(this.spawnA, this.spawnB), this.height,
+        utils.rand(0, this.width),            utils.rand(this.spawnC, this.spawnD),
+        utils.rand(0, 360),                   utils.rand(30, 110)
       ));
       this.counter = 0;
     }
 
-    // Prune dead fireworks to prevent memory bloat
     if (this.fireworks.length > 1000)
       this.fireworks = this.fireworks.filter(fw => !fw.dead);
   }
 }
 
 class FireworkPiece {
-  constructor(x, y, targetX, targetY, shade, offsprings) {
-    this.x = x; this.y = y;
-    this.targetX = targetX; this.targetY = targetY;
-    this.shade = shade;
-    this.offsprings = offsprings;
-    this.history = [];
-    this.madeChilds = false;
-    this.dead = false;
+  constructor(x, y, tx, ty, shade, offsprings) {
+    Object.assign(this, { x, y, targetX: tx, targetY: ty, shade, offsprings });
+    this.history     = [];
+    this.madeChilds  = false;
+    this.dead        = false;
   }
 
   draw(ctx, delta, parent) {
@@ -886,13 +772,11 @@ class FireworkPiece {
     const dy = this.targetY - this.y;
 
     if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-      // Still travelling toward target — move and record trail
       this.x += dx * 2 * delta;
       this.y += dy * 2 * delta;
       this.history.push({ x: this.x, y: this.y });
       if (this.history.length > 20) this.history.shift();
     } else {
-      // Reached target — spawn child particles if this is a parent firework
       if (this.offsprings && !this.madeChilds) {
         const half = this.offsprings / 2;
         for (let i = 0; i < half; i++) {
@@ -908,7 +792,6 @@ class FireworkPiece {
       this.history.shift();
     }
 
-    // Trail exhausted — mark dead
     if (!this.history.length) { this.dead = true; return; }
 
     ctx.beginPath();
@@ -919,33 +802,43 @@ class FireworkPiece {
 }
 
 
-// ===================== CUTE DESK & GRAND REVEAL LOGIC =====================
-
-/* =============================================================
-   MAGICAL ROSE REVEAL LOGIC
-    ============================================================= */
+/* ================================================================
+   16. ROSE OVERLAY
+================================================================ */
 function openMagicalRose() {
-  const overlay = document.getElementById('roseOverlay');
-  const glass = document.getElementById('magicGlass');
-
-  // Overlay ko screen par dikhao
-  overlay.classList.add('active');
-
-  // 0.8 seconds ka wait karke jar ko upar uthao
-  setTimeout(() => {
-    glass.classList.add('lift-up');
-  }, 800);
+  byId('roseOverlay')?.classList.add('active');
+  setTimeout(() => byId('magicGlass')?.classList.add('lift-up'), 800);
 }
 
 function closeMagicalRose() {
-  const overlay = document.getElementById('roseOverlay');
-  const glass = document.getElementById('magicGlass');
-
-  // Overlay ko chhupao
-  overlay.classList.remove('active');
-
-  // Jar ko wapas neeche rakh do taaki agli baar fir se jadoo ho sake
-  setTimeout(() => {
-    glass.classList.remove('lift-up');
-  }, 500);
+  byId('roseOverlay')?.classList.remove('active');
+  setTimeout(() => byId('magicGlass')?.classList.remove('lift-up'), 500);
 }
+
+
+/* ================================================================
+   17. BOOTSTRAP — fetch data.json → init everything
+================================================================ */
+fetch('data.json')
+  .then(r => r.json())
+  .then(data => {
+    renderBook(data.book);
+    renderSlider(data.memories);
+    renderCarousel(data.carousel);
+    renderSpinner(data.spinner);
+    renderJhoomar(data.jhoomar);
+    renderMagicalGallery(data.magicalGallery);
+    renderAnimatedFrame(data.animatedFrame);
+
+    // Non-data inits
+    initClock();
+    createFireflies();
+    initMusicPlayer();
+
+    // Hide loader after 3s
+    setTimeout(() => {
+      byId('loader')?.classList.add('hidden');
+      $('.book-controls')?.classList.remove('d-none');
+    }, 3000);
+  })
+  .catch(err => console.error('Failed to load data.json:', err));
