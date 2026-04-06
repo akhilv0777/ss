@@ -971,26 +971,26 @@ document.addEventListener('copy', function(e) {
 })();
 
 // ═══════════════════════════════════════════════════
-//  LAYER 11 — DOM mutation guard: detect injected
-//             script/extension nodes and remove them
+//  LAYER 11 — DOM mutation guard
 // ═══════════════════════════════════════════════════
 (function domGuard() {
-  const observer = new MutationObserver(function(mutations) {
-    for (const m of mutations) {
-      for (const node of m.addedNodes) {
+  var observer = new MutationObserver(function(mutations) {
+    for (var i = 0; i < mutations.length; i++) {
+      var added = mutations[i].addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        var node = added[j];
         if (node.tagName === 'SCRIPT' || node.tagName === 'LINK') {
-          const src = node.src || node.href || '';
-          // Block anything not from your own origin
-          if (src && !src.startsWith(window.location.origin)) {
-            node.remove();
-            console.warn('[Guard] Blocked external node:', src);
+          var src = node.src || node.href || '';
+          if (src && src.indexOf(window.location.origin) !== 0) {
+            node.parentNode && node.parentNode.removeChild(node);
           }
         }
       }
     }
   });
   observer.observe(document.documentElement, {
-    childList: true, subtree: true
+    childList: true,
+    subtree: true
   });
 })();
 
