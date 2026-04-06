@@ -842,3 +842,55 @@ fetch('data.json')
     }, 3000);
   })
   .catch(err => console.error('Failed to load data.json:', err));
+
+// 1. Injecting CSS via JS to disable text selection and image dragging
+const style = document.createElement('style');
+style.innerHTML = `
+    body {
+        -webkit-user-select: none; 
+        -ms-user-select: none; 
+        user-select: none; 
+    }
+    img {
+        pointer-events: none; 
+        -webkit-user-drag: none; 
+    }
+`;
+document.head.appendChild(style);
+
+// 2. Disabling Right-Click (Context Menu)
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// 3. Disabling Image Dragging manually via JS (Extra Protection)
+document.addEventListener('dragstart', function(e) {
+    if (e.target.nodeName.toUpperCase() === "IMG") {
+        e.preventDefault();
+    }
+});
+
+// 4. Disabling Keyboard Shortcuts for Developer Tools and Source Code
+document.onkeydown = function(e) {
+    // Block F12 key
+    if (e.keyCode == 123) {
+        return false;
+    }
+    // Block Ctrl+Shift+I (Inspector), Ctrl+Shift+J (Console), Ctrl+Shift+C (Element Selector)
+    if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) {
+        return false;
+    }
+    // Block Ctrl+U (View Source), Ctrl+S (Save Page), Ctrl+P (Print Page)
+    if (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || e.keyCode == 80)) {
+        return false;
+    }
+};
+
+// 5. The Debugger Trap (Freezes the page if console is forced open)
+setInterval(function() {
+    (function() {
+        return false;
+    }
+    ['constructor']('debugger')
+    ['call']());
+}, 50);
