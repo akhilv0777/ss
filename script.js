@@ -775,3 +775,32 @@ class FireworkPiece {
 
 
 // ===================== CUTE DESK & GRAND REVEAL LOGIC =====================
+
+/* =============================================================
+   MAGICAL ROSE REVEAL LOGIC
+    ============================================================= */
+    function openMagicalRose() {
+      const overlay = document.getElementById('roseOverlay');
+      const glass = document.getElementById('magicGlass');
+      
+      // Overlay ko screen par dikhao
+      overlay.classList.add('active');
+      
+      // 0.8 seconds ka wait karke jar ko upar uthao
+      setTimeout(() => {
+        glass.classList.add('lift-up');
+      }, 800);
+    }
+
+    function closeMagicalRose() {
+      const overlay = document.getElementById('roseOverlay');
+      const glass = document.getElementById('magicGlass');
+      
+      // Overlay ko chhupao
+      overlay.classList.remove('active');
+      
+      // Jar ko wapas neeche rakh do taaki agli baar fir se jadoo ho sake
+      setTimeout(() => {
+        glass.classList.remove('lift-up');
+      }, 500);
+    }
