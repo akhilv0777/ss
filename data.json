@@ -1,30 +1,9 @@
 {
    "book": [
-     {
-        "id": "p1",
-        "zIndex": 4,
-        "isCover": true,
-        "backContent": { "title": "To My Bestie Saumya,", "text": "A special chapter in the beautiful book of your life...", "symbol": "💎" },
-        "frontContent": { "coverImg": "./assets/ss (1).jpg", "title": "The Golden Days of Saumya", "chapter": "Chapter 2026", "footer": "Keep Moving Forward" }
-      },
-     {
-        "id": "p2",
-        "zIndex": 3,
-        "backContent": { "img": "./assets/ss (2).jpg", "text": "\"A heart of gold\" 💛" },
-        "frontContent": { "img": "./assets/ss (3).jpg", "text": "\"A gathering of memories\" 🎞️" }
-      },
-     {
-        "id": "p3",
-        "zIndex": 2,
-        "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Courage and tenderness\" 💪" },
-        "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Big dreams\" 🚀" }
-      },
-      {
-        "id": "p4",
-        "zIndex": 1,
-        "backContent": { "title": "Always Stay Awesome", "text": "The world is incomplete without a friend like you!" },
-        "frontContent": { "img": "./assets/ss (6).jpg", "text": "\"That iconic vibe\" ✨" }
-      }
+     { "id": "p1", "zIndex": 4, "isCover": true, "backContent": { "title": "To My Bestie Saumya,", "text": "A special chapter in the beautiful book of your life...", "symbol": "💎" }, "frontContent": { "coverImg": "./assets/ss (1).jpg", "title": "The Golden Days of Saumya", "chapter": "Chapter 2026", "footer": "Keep Moving Forward" } },
+     { "id": "p2", "zIndex": 3, "backContent": { "img": "./assets/ss (2).jpg", "text": "\"A heart of gold\" 💛" }, "frontContent": { "img": "./assets/ss (3).jpg", "text": "\"A gathering of memories\" 🎞️" } },
+     { "id": "p3", "zIndex": 2, "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Courage and tenderness\" 💪" }, "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Big dreams\" 🚀" } },
+     { "id": "p4", "zIndex": 1, "backContent": { "title": "Always Stay Awesome", "text": "The world is incomplete without a friend like you!" }, "frontContent": { "img": "./assets/ss (6).jpg", "text": "\"That iconic vibe\" ✨" } }
    ],
    "memories": [
      { "img": "./assets/ss (7).jpg", "title": "Amazing Friend...", "desc": "I was thinking about our funny moments today and couldn't help but laugh. Your presence always lightens the mood." },
@@ -74,14 +53,18 @@
      { "img": "./assets/ss (45).jpg" },
      { "img": "./assets/ss (46).jpg" }
    ],
-   "magicalGallery": [
-     {
-        "id": "vid_1", "type": "video",
-        "src": "./assets/ss (1).mp4",
-        "frontNote": "Our Funniest Moment 🎥",
-        "backNote": "This hilarious moment will always be cherished! 😂",
-        "isMain": true
-      },
+    "saumyaImages": [
+      "./assets/ss (12).jpg",
+      "./assets/ss (13).jpg",
+      "./assets/ss (17).jpg",
+      "./assets/ss (19).jpg"
+    ],
+    "musicList": [
+      { "name": "Somu Special Song 1", "src": "./assets/music.mp3" },
+      { "name": "Cute Background Music", "src": "./assets/music2.mp3" }
+    ],
+    "magicalGallery": [
+     { "id": "vid_1", "type": "video", "src": "./assets/ss (1).mp4", "frontNote": "Our Funniest Moment 🎥", "backNote": "This hilarious moment will always be cherished! 😂", "isMain": true },
      { "id": "pic_1", "type": "image", "src": "./assets/ss (47).jpg", "frontNote": "Above the Clouds ☁️", "backNote": "Wishing you always reach for the sky and achieve your goals!" },
      { "id": "pic_2", "type": "image", "src": "./assets/ss (48).jpg", "frontNote": "Best Vibe 💯", "backNote": "Your positive energy is unmatched. Nazar na lage! 🧿" },
      { "id": "pic_3", "type": "image", "src": "./assets/ss (49).jpg", "frontNote": "That Sweet Smile 😊", "backNote": "Your cheerful nature brightens everyone's day around you." },
@@ -113,5 +96,5 @@
    "animatedFrame": {
      "text": "HAPPY BIRTHDAY SAUMYA",
      "img": "./assets/ss (72).jpg"
-   }
+    }
 }
