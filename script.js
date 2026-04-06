@@ -843,54 +843,164 @@ fetch('data.json')
   })
   .catch(err => console.error('Failed to load data.json:', err));
 
-// 1. Injecting CSS via JS to disable text selection and image dragging
-const style = document.createElement('style');
-style.innerHTML = `
-    body {
-        -webkit-user-select: none; 
-        -ms-user-select: none; 
-        user-select: none; 
+// ═══════════════════════════════════════════════════
+//  LAYER 1 — CSS: block selection, drag, callout
+// ═══════════════════════════════════════════════════
+(function injectCSS() {
+  const s = document.createElement('style');
+  s.innerHTML = `
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     img {
-        pointer-events: none; 
-        -webkit-user-drag: none; 
+      pointer-events: none;
+      -webkit-user-drag: none;
     }
-`;
-document.head.appendChild(style);
+    @media print {
+      body { display: none !important; }
+    }`;
+  document.head.appendChild(s);
+})();
 
-// 2. Disabling Right-Click (Context Menu)
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
+// ═══════════════════════════════════════════════════
+//  LAYER 2 — Block context menu + drag
+// ═══════════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dragstart',   e => e.preventDefault());
+
+// ═══════════════════════════════════════════════════
+//  LAYER 3 — Keyboard shortcut block
+// ═══════════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  const c = e.ctrlKey || e.metaKey;
+  // F12
+  if (e.keyCode === 123) return e.preventDefault();
+  // Ctrl+Shift+I/J/C (devtools), Ctrl+Shift+K (Firefox console)
+  if (c && e.shiftKey && [73,74,67,75].includes(e.keyCode)) return e.preventDefault();
+  // Ctrl+U (source), Ctrl+S (save), Ctrl+P (print), Ctrl+A (select all)
+  if (c && [85,83,80,65].includes(e.keyCode)) return e.preventDefault();
+  // F5 / Ctrl+R — prevent reload stripping session watermarks
+  // (remove if you want normal reload behaviour)
+  // if (e.keyCode === 116 || (c && e.keyCode === 82)) return e.preventDefault();
 });
 
-// 3. Disabling Image Dragging manually via JS (Extra Protection)
-document.addEventListener('dragstart', function(e) {
-    if (e.target.nodeName.toUpperCase() === "IMG") {
-        e.preventDefault();
-    }
-});
-
-// 4. Disabling Keyboard Shortcuts for Developer Tools and Source Code
-document.onkeydown = function(e) {
-    // Block F12 key
-    if (e.keyCode == 123) {
-        return false;
-    }
-    // Block Ctrl+Shift+I (Inspector), Ctrl+Shift+J (Console), Ctrl+Shift+C (Element Selector)
-    if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) {
-        return false;
-    }
-    // Block Ctrl+U (View Source), Ctrl+S (Save Page), Ctrl+P (Print Page)
-    if (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || e.keyCode == 80)) {
-        return false;
-    }
-};
-
-// 5. The Debugger Trap (Freezes the page if console is forced open)
+// ═══════════════════════════════════════════════════
+//  LAYER 4 — Debugger trap
+// ═══════════════════════════════════════════════════
 setInterval(function() {
-    (function() {
-        return false;
-    }
-    ['constructor']('debugger')
-    ['call']());
+  (function() { return false; }
+    ['constructor']('debugger')['call']());
 }, 50);
+
+// ═══════════════════════════════════════════════════
+//  LAYER 5 — DevTools window-size detection
+//  Opens devtools → window shrinks → triggers alert
+// ═══════════════════════════════════════════════════
+(function detectDevTools() {
+  const THRESHOLD = 160;
+  function check() {
+    const widthDiff  = window.outerWidth  - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    if (widthDiff > THRESHOLD || heightDiff > THRESHOLD) {
+      document.body.innerHTML =
+        '
+' +
+        'This content is not available.
+';
+    }
+  }
+  setInterval(check, 1000);
+  window.addEventListener('resize', check);
+})();
+
+// ═══════════════════════════════════════════════════
+//  LAYER 6 — Tab visibility: wipe sensitive content
+//            when user switches away (screen-record)
+// ═══════════════════════════════════════════════════
+(function tabGuard() {
+  const SENSITIVE = document.getElementById('protected-content');
+  document.addEventListener('visibilitychange', function() {
+    if (!SENSITIVE) return;
+    SENSITIVE.style.filter =
+      document.hidden ? 'blur(20px)' : 'none';
+  });
+})();
+
+// ═══════════════════════════════════════════════════
+//  LAYER 7 — Bust out of iframes (clickjacking guard)
+// ═══════════════════════════════════════════════════
+(function frameBust() {
+  if (window.top !== window.self) {
+    window.top.location = window.self.location;
+  }
+})();
+
+// ═══════════════════════════════════════════════════
+//  LAYER 8 — Print via JS also blocked
+// ═══════════════════════════════════════════════════
+window.print = function() { return false; };
+
+// ═══════════════════════════════════════════════════
+//  LAYER 9 — Clipboard hijack: replace copied text
+// ═══════════════════════════════════════════════════
+document.addEventListener('copy', function(e) {
+  e.clipboardData.setData('text/plain',
+    '© Protected content. Reproduction prohibited.');
+  e.preventDefault();
+});
+
+// ═══════════════════════════════════════════════════
+//  LAYER 10 — Screenshot deterrent: invisible overlay
+//  Breaks basic screenshot tools that need cursor
+// ═══════════════════════════════════════════════════
+(function screenshotOverlay() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText =
+    'position:fixed;top:0;left:0;width:100%;height:100%;' +
+    'z-index:2147483647;pointer-events:none;' +
+    'background:repeating-linear-gradient(' +
+    '45deg,transparent,transparent 10px,' +
+    'rgba(255,255,255,0.01) 10px,' +
+    'rgba(255,255,255,0.01) 20px);';
+  document.body.appendChild(overlay);
+})();
+
+// ═══════════════════════════════════════════════════
+//  LAYER 11 — DOM mutation guard: detect injected
+//             script/extension nodes and remove them
+// ═══════════════════════════════════════════════════
+(function domGuard() {
+  const observer = new MutationObserver(function(mutations) {
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.tagName === 'SCRIPT' || node.tagName === 'LINK') {
+          const src = node.src || node.href || '';
+          // Block anything not from your own origin
+          if (src && !src.startsWith(window.location.origin)) {
+            node.remove();
+            console.warn('[Guard] Blocked external node:', src);
+          }
+        }
+      }
+    }
+  });
+  observer.observe(document.documentElement, {
+    childList: true, subtree: true
+  });
+})();
+
+// ═══════════════════════════════════════════════════
+//  LAYER 12 — Silence console & overwrite devtools
+//             output so scrapers get no info
+// ═══════════════════════════════════════════════════
+(function silenceConsole() {
+  const noop = function() {};
+  ['log','warn','error','info','debug','table','dir'].forEach(function(m) {
+    console[m] = noop;
+  });
+})();
