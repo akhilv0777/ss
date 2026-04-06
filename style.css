@@ -520,16 +520,29 @@ html { -ms-overflow-style: none; scrollbar-width: none; }
 /* ═══════════════════════════════════════════════════════════════
    ANIMATED FRAME SECTION
    ═══════════════════════════════════════════════════════════════ */
-#frameSection { position: relative; min-height: 100vh; width: 100%; display: flex; justify-content: center; align-items: center; background: rgba(15,5,20,0.5); backdrop-filter: var(--blur-lg); -webkit-backdrop-filter: var(--blur-lg); overflow: hidden; }
-.frame { --duration:   12s; --size:       clamp(280px, 70vw, 450px); --font-size:  clamp(18px, 4vw, 24px); --text-color-hover: var(--frame-pink); width: var(--size); height: var(--size); margin: 0 auto; border: 3px solid var(--white-a80); position: relative; box-shadow: 0 15px 40px var(--black-a60), inset 0 0 0 25px var(--white-a95); background-position: center !important; background-size: cover !important; transition: all 0.5s var(--ease-smooth); z-index: 10; border-radius: 4px; }
-.frame:hover { box-shadow: 0 20px 50px rgba(255,126,179,0.3), inset 0 0 0 0 var(--white-a10); border-color: var(--frame-pink); cursor: pointer; transform: scale(1.02); }
-.frame:hover .text { mix-blend-mode: normal; }
-.frame:hover .text span { color: var(--text-color-hover); text-shadow: 0 0 10px rgba(255,126,179,0.8); }
-.frame .text { transform: translate(calc(var(--font-size) * -0.5), calc(var(--font-size) * -0.5)); position: relative; height: 100%; transition: all 0.4s ease; }
-.frame span  { font-size: var(--font-size); display: inline-block; text-align: center; width: var(--font-size); animation: frameMove var(--duration) linear infinite; position: absolute; transition: all 0.3s ease; font-family: var(--f-heading); font-weight: bold; color: var(--white); text-shadow: 0 2px 6px var(--black-a90), 0 0 10px var(--white-a50); }
-@keyframes frameMove { 0%{top:0;left:0;transform:rotate(0deg)} 24%{top:0;left:100%;transform:rotate(0deg)} 25%{transform:rotate(90deg)} 49%{top:100%;left:100%;transform:rotate(90deg)} 50%{transform:rotate(180deg)} 74%{top:100%;left:0%;transform:rotate(180deg)} 75%{transform:rotate(270deg)} 99%{top:0%;left:0%;transform:rotate(270deg)} 100%{transform:rotate(360deg)} }
+#frameSection { position: relative; min-height: 100vh; width: 100%; display: flex; justify-content: center; align-items: center; background: rgba(10, 5, 20, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; }
+.frame { --size: clamp(200px, 50vw, 350px); width: var(--size); height: var(--size); border-radius: 50%; position: relative; box-shadow: 0 0 30px rgba(214, 51, 108, 0.4), inset 0 0 20px rgba(0,0,0,0.6); border: 4px solid rgba(255, 126, 179, 0.5); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10; }
 
+.frame:hover { box-shadow: 0 0 60px rgba(255, 126, 179, 0.8), inset 0 0 0 rgba(0,0,0,0); border-color: #fff; cursor: pointer; }
 
+/* --- THE MAGIC: INNER CIRCLE & IMAGE ZOOM --- */
+.frame-inner { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; z-index: 1; }
+.frame-bg { width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Hover par sirf andar ki photo makhhan ki tarah zoom hogi */
+.frame:hover .frame-bg { transform: scale(1.15); }
+
+/* Photo ke upar dark glass ka effect */
+.frame-inner::after { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); transition: all 0.6s ease; pointer-events: none; }
+/* Hover par dark glass hat jayega aur photo bright dikhegi */
+.frame:hover .frame-inner::after { background: rgba(0, 0, 0, 0); }
+
+/* --- TEXT HALO --- */
+.frame .text { position: absolute; top: 50%; left: 50%; width: 0; height: 0; animation: spinHalo 20s linear infinite; z-index: 3; /* Sabse upar taaki ghoome */ }
+.frame span { position: absolute; top: 0; left: 0; display: flex; justify-content: center; align-items: center; width: 20px; height: 20px; margin-top: -10px; margin-left: -10px; font-family: var(--f-script, cursive); font-size: clamp(14px, 3vw, 18px); font-weight: bold; color: rgba(255, 255, 255, 0.8); text-shadow: 0 0 5px rgba(214, 51, 108, 0.8); transition: all 0.4s ease; text-transform: uppercase; letter-spacing: 2px; }
+.frame:hover span { color: #fff; text-shadow: 0 0 15px #ff7eb3, 0 0 25px #d6336c; }
+
+@keyframes spinHalo { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 /* ═══════════════════════════════════════════════════════════════
    FIREWORKS / CELEBRATION
    ═══════════════════════════════════════════════════════════════ */
