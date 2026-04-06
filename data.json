@@ -19,7 +19,7 @@
         "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Courage and tenderness\" 💪" },
         "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Big dreams\" 🚀" }
       },
-     {
+      {
         "id": "p4",
         "zIndex": 1,
         "backContent": { "title": "Always Stay Awesome", "text": "The world is incomplete without a friend like you!" },
@@ -74,10 +74,6 @@
      { "img": "./assets/ss (45).jpg" },
      { "img": "./assets/ss (46).jpg" }
    ],
-   "letter": {
-     "title": "Happy Birthday Saumya! 🎂",
-     "message": "Happy Birthday to my amazing bestie, Saumya! 🎉 Wishing you a day as wonderfully bright and fun as you are. May all your dreams come true this year. Keep shining, smiling, and being the incredible, supportive friend you always are! Wishing you a fantastic year ahead! ✨"
-   },
    "magicalGallery": [
      {
         "id": "vid_1", "type": "video",
