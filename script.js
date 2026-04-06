@@ -840,5 +840,3 @@ fetch('data.json')
     }, 3000);
   })
   .catch(err => console.error('Failed to load data.json:', err));
-
-document.addEventListener("DOMContentLoaded", function () {
