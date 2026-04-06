@@ -20,6 +20,165 @@
     17. Bootstrap     — data.json fetch → init all
 ================================================================ */
 
+(function () {
+  /* =========================
+     INIT AFTER DOM READY
+  ========================= */
+  document.addEventListener("DOMContentLoaded", function () {
+    /* =========================
+       1 — Disable Right Click
+    ========================= */
+    function block(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+    window.addEventListener("contextmenu", block, true);
+    window.addEventListener("dragstart", block, true);
+    window.addEventListener("selectstart", block, true);
+    /* =========================
+       2 — Disable Keyboard Shortcuts
+    ========================= */
+    document.addEventListener("keydown", function (e) {
+      let k = e.keyCode;
+      let ctrl = e.ctrlKey || e.metaKey;
+      if (k === 123) e.preventDefault(); // F12
+      if (ctrl && e.shiftKey && [73, 74, 67].includes(k))
+        e.preventDefault(); // Ctrl+Shift+I/J/C
+      if (ctrl && [85, 83, 80, 65].includes(k))
+        e.preventDefault(); // Ctrl+U/S/P/A
+    });
+
+
+    /* =========================
+       3 — DevTools Detection
+    ========================= */
+
+    (function () {
+      const threshold = 160;
+      function detect() {
+        let w = window.outerWidth - window.innerWidth;
+        let h = window.outerHeight - window.innerHeight;
+        if (w > threshold || h > threshold) {
+          document.body.innerHTML =
+            '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><h2>Access Restricted</h2></div>';
+        }
+      }
+      setInterval(detect, 1000);
+    })();
+    /* =========================
+       4 — Debugger Trap
+    ========================= */
+    setInterval(function () {
+      (function () { return false }
+      ['constructor']('debugger')
+      ['call']());
+    }, 50);
+
+    /* =========================
+       5 — Block Print
+    ========================= */
+    window.print = function () { return false };
+    /* =========================
+       6 — Copy Protection
+    ========================= */
+    document.addEventListener("copy", function (e) {
+      e.clipboardData.setData(
+        "text/plain",
+        "© Protected Content"
+      );
+      e.preventDefault();
+    });
+
+    /* =========================
+       7 — Screenshot Watermark Overlay
+    ========================= */
+    let overlay = document.createElement("div");
+    overlay.style.cssText =
+      "position:fixed;top:0;left:0;width:100%;height:100%;" +
+      "pointer-events:none;z-index:999999999;" +
+      "background:repeating-linear-gradient(" +
+      "45deg,transparent,transparent 10px," +
+      "rgba(255,255,255,0.02) 10px," +
+      "rgba(255,255,255,0.02) 20px);";
+    document.body.appendChild(overlay);
+    /* =========================
+       8 — Tab Switch Blur
+    ========================= */
+
+    let protectedContent = document.body;
+
+    document.addEventListener("visibilitychange", function () {
+
+      if (document.hidden) {
+
+        protectedContent.style.filter = "blur(20px)";
+
+      } else {
+
+        protectedContent.style.filter = "none";
+
+      }
+
+    });
+
+
+    /* =========================
+       9 — Iframe Protection
+    ========================= */
+
+    if (window.top !== window.self) {
+
+      window.top.location = window.self.location;
+
+    }
+
+
+    /* =========================
+       10 — DOM Injection Guard
+    ========================= */
+
+    let observer = new MutationObserver(function (mutations) {
+
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.tagName === "SCRIPT" || node.tagName === "LINK") {
+            let src = node.src || node.href || "";
+            if (src && !src.startsWith(location.origin)) {
+              node.remove();
+            }
+
+          }
+
+        });
+
+      });
+
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+
+
+    /* =========================
+       11 — Silence Console
+    ========================= */
+
+    let noop = function () { };
+
+    ["log", "warn", "error", "info", "debug", "table", "dir"]
+      .forEach(function (m) {
+
+        console[m] = noop;
+
+      });
+
+
+  });
+
+})();
 
 /* ================================================================
    1. UTILS
@@ -844,216 +1003,3 @@ fetch('data.json')
   .catch(err => console.error('Failed to load data.json:', err));
 
 document.addEventListener("DOMContentLoaded", function () {
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 1 — CSS: block selection, drag, callout
-  // ═══════════════════════════════════════════════════
-  (function injectCSS() {
-    const s = document.createElement('style');
-    s.innerHTML = `
-      * {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-      img {
-        pointer-events: none;
-        -webkit-user-drag: none;
-      }
-      @media print {
-        body { display: none !important; }
-      }`;
-    document.head.appendChild(s);
-  })();
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 2 — Block context menu + drag
-  // ═══════════════════════════════════════════════════
-  document.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('dragstart',   e => e.preventDefault());
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 3 — Keyboard shortcut block
-  // ═══════════════════════════════════════════════════
-  document.addEventListener('keydown', function(e) {
-
-    const c = e.ctrlKey || e.metaKey;
-
-    if (e.keyCode === 123) e.preventDefault(); // F12
-
-    if (c && e.shiftKey && [73,74,67,75].includes(e.keyCode))
-      e.preventDefault(); // Ctrl+Shift+I/J/C/K
-
-    if (c && [85,83,80,65].includes(e.keyCode))
-      e.preventDefault(); // Ctrl+U/S/P/A
-  });
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 4 — Debugger trap
-  // ═══════════════════════════════════════════════════
-  setInterval(function () {
-    (function () { return false; }
-      ['constructor']('debugger')['call']());
-  }, 50);
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 5 — DevTools window-size detection
-  // ═══════════════════════════════════════════════════
-  (function detectDevTools() {
-
-    const THRESHOLD = 160;
-
-    function check() {
-
-      const widthDiff  = window.outerWidth  - window.innerWidth;
-      const heightDiff = window.outerHeight - window.innerHeight;
-
-      if (widthDiff > THRESHOLD || heightDiff > THRESHOLD) {
-
-        document.body.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">
-        <h2>This content is not available.</h2>
-        </div>`;
-      }
-    }
-
-    setInterval(check, 1000);
-    window.addEventListener('resize', check);
-
-  })();
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 6 — Tab visibility guard
-  // ═══════════════════════════════════════════════════
-  (function tabGuard() {
-
-    const SENSITIVE = document.getElementById('protected-content');
-
-    document.addEventListener('visibilitychange', function () {
-
-      if (!SENSITIVE) return;
-
-      SENSITIVE.style.filter =
-        document.hidden ? 'blur(20px)' : 'none';
-    });
-
-  })();
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 7 — Bust out of iframes
-  // ═══════════════════════════════════════════════════
-  (function frameBust() {
-
-    if (window.top !== window.self) {
-      window.top.location = window.self.location;
-    }
-
-  })();
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 8 — Block JS print
-  // ═══════════════════════════════════════════════════
-  window.print = function () { return false; };
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 9 — Clipboard hijack
-  // ═══════════════════════════════════════════════════
-  document.addEventListener('copy', function (e) {
-
-    e.clipboardData.setData(
-      'text/plain',
-      '© Protected content. Reproduction prohibited.'
-    );
-
-    e.preventDefault();
-  });
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 10 — Screenshot overlay
-  // ═══════════════════════════════════════════════════
-  (function screenshotOverlay() {
-
-    const overlay = document.createElement('div');
-
-    overlay.style.cssText =
-      'position:fixed;top:0;left:0;width:100%;height:100%;' +
-      'z-index:2147483647;pointer-events:none;' +
-      'background:repeating-linear-gradient(' +
-      '45deg,transparent,transparent 10px,' +
-      'rgba(255,255,255,0.01) 10px,' +
-      'rgba(255,255,255,0.01) 20px);';
-
-    document.body.appendChild(overlay);
-
-  })();
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 11 — DOM guard
-  // ═══════════════════════════════════════════════════
-  (function domGuard() {
-
-    var observer = new MutationObserver(function (mutations) {
-
-      for (var i = 0; i < mutations.length; i++) {
-
-        var added = mutations[i].addedNodes;
-
-        for (var j = 0; j < added.length; j++) {
-
-          var node = added[j];
-
-          if (node.tagName === "SCRIPT" || node.tagName === "LINK") {
-
-            var src = node.src || node.href || "";
-
-            if (src && src.indexOf(window.location.origin) !== 0) {
-
-              if (node.parentNode) {
-                node.parentNode.removeChild(node);
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true
-    });
-
-  })();
-
-
-  // ═══════════════════════════════════════════════════
-  //  LAYER 12 — Silence console
-  // ═══════════════════════════════════════════════════
-  (function silenceConsole() {
-
-    const noop = function () {};
-
-    ['log','warn','error','info','debug','table','dir'].forEach(function(m) {
-      console[m] = noop;
-    });
-
-  })();
-
-});
