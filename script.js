@@ -970,19 +970,18 @@ document.addEventListener('copy', function(e) {
   document.body.appendChild(overlay);
 })();
 
-// ═══════════════════════════════════════════════════
-//  LAYER 11 — DOM mutation guard
-// ═══════════════════════════════════════════════════
 (function domGuard() {
   var observer = new MutationObserver(function(mutations) {
     for (var i = 0; i < mutations.length; i++) {
       var added = mutations[i].addedNodes;
       for (var j = 0; j < added.length; j++) {
         var node = added[j];
-        if (node.tagName === 'SCRIPT' || node.tagName === 'LINK') {
-          var src = node.src || node.href || '';
+        if (node.tagName === "SCRIPT" || node.tagName === "LINK") {
+          var src = node.src || node.href || "";
           if (src && src.indexOf(window.location.origin) !== 0) {
-            node.parentNode && node.parentNode.removeChild(node);
+            if (node.parentNode) {
+              node.parentNode.removeChild(node);
+            }
           }
         }
       }
