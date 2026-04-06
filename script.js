@@ -505,29 +505,26 @@ function initMagicalGallery() {
 
 
 /* =============================================================
-   ANIMATED FRAME TEXT
+   ANIMATED HALO TEXT FRAME LOGIC (Fixed Circle & Smooth Zoom)
 ============================================================= */
-
-/** Fills the animated frame with character spans for staggered animation */
 function renderAnimatedFrame({ img, text } = {}) {
-  const frame = document.getElementById('dynamicFrame');
+  const bg = document.getElementById('frameBg');
   const textContainer = document.getElementById('dynamicTextContainer');
-  if (!frame || !textContainer || !text) return;
+  if (!bg || !textContainer || !text) return;
 
-  frame.style.background = `url('${img}') no-repeat center`;
+  // Photo ab inner background par set hogi
+  bg.style.background = `url('${img}') no-repeat center`;
+  bg.style.backgroundSize = 'cover';
 
-  const totalSpans = 54;
-  // Repeat text until we have enough characters, then take exactly totalSpans
-  const chars = text.repeat(Math.ceil(totalSpans / text.length))
-    .slice(0, totalSpans)
-    .split('')
-    .reverse();
+  // Text ko bada karke repeat karna taaki poora ghera ban jaye
+  const fullText = (text + " • ").repeat(4); 
+  const chars = fullText.split('');
+  const deg = 360 / chars.length;
 
   textContainer.innerHTML = chars.map((char, i) =>
-    `<span style="animation-delay:${0.22 * (i + 1)}s">${char}</span>`
+    `<span style="transform: rotate(${i * deg}deg) translateY(calc(var(--size) * -0.65));">${char}</span>`
   ).join('');
 }
-
 
 /* =============================================================
    BACKGROUND MUSIC
