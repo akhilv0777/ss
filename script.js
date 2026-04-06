@@ -1,3 +1,96 @@
+  (function () {
+    document.addEventListener("DOMContentLoaded", function () {
+      /* ========= 1 — Disable Right Click ========= */
+      function block(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      window.addEventListener("contextmenu", block, true);
+      window.addEventListener("dragstart", block, true);
+      window.addEventListener("selectstart", block, true);
+      /* ========= 2 — Disable Keyboard Shortcuts ========= */
+      document.addEventListener("keydown", function (e) {
+        let k = e.keyCode;
+        let ctrl = e.ctrlKey || e.metaKey;
+        if (k === 123) e.preventDefault(); // F12
+        if (ctrl && e.shiftKey && [73, 74, 67].includes(k))
+          e.preventDefault(); 
+        if (ctrl && [85, 83, 80, 65].includes(k))
+          e.preventDefault(); // Ctrl+U/S/P/A
+      });
+      /* ========= 3 — DevTools Detection ========= */
+      (function () {
+        const threshold = 160;
+        function detect() {
+          let w = window.outerWidth - window.innerWidth;
+          let h = window.outerHeight - window.innerHeight;
+          if (w > threshold || h > threshold) {
+            document.body.innerHTML =
+              '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><h2>Access Restricted</h2></div>';
+          }
+        }
+        setInterval(detect, 1000);
+      })();
+      /* ========= 4 — Debugger Trap ========= */
+      setInterval(function () {
+        (function () { return false }
+        ['constructor']('debugger')
+        ['call']());
+      }, 50);
+      /* ========= 5 — Block Print ========= */
+      window.print = function () { return false };
+      /* ========= 6 — Copy Protection ========= */
+      document.addEventListener("copy", function (e) {
+        e.clipboardData.setData(
+          "text/plain",
+          "© Protected Content"
+        );
+        e.preventDefault();
+      });
+      /* ========= 7 — Tab Switch Blur ========= */
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+          document.body.style.filter = "blur(20px)";
+        } else {
+          document.body.style.filter = "none";
+        }
+      });
+      /* ========= 8 — Iframe Protection ========= */
+
+      if (window.top !== window.self) {
+        window.top.location = window.self.location;
+      }
+      /* ========= 9 — DOM Injection Guard ========= */
+      let observer = new MutationObserver(function (mutations) {
+
+        mutations.forEach(function (m) {
+
+          m.addedNodes.forEach(function (node) {
+
+            if (node.tagName === "SCRIPT" || node.tagName === "LINK") {
+
+              let src = node.src || node.href || "";
+              if (src && !src.startsWith(location.origin)) {
+                node.remove();
+              }
+            }
+          });
+        });
+      });
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+      /* ========= 10 — Silence Console ========= */
+      let noop = function () { };
+      ["log", "warn", "error", "info", "debug", "table", "dir"]
+        .forEach(function (m) {
+          console[m] = noop;
+        });
+    });
+  })();
+
 /* ================================================================
    main.js — Fully Optimized & Reusable
    Architecture:
@@ -19,167 +112,6 @@
     16. RoseOverlay   — Magical rose modal
     17. Bootstrap     — data.json fetch → init all
 ================================================================ */
-
-(function () {
-  /* =========================
-     INIT AFTER DOM READY
-  ========================= */
-  document.addEventListener("DOMContentLoaded", function () {
-    /* =========================
-       1 — Disable Right Click
-    ========================= */
-    function block(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-    window.addEventListener("contextmenu", block, true);
-    window.addEventListener("dragstart", block, true);
-    window.addEventListener("selectstart", block, true);
-    /* =========================
-       2 — Disable Keyboard Shortcuts
-    ========================= */
-    document.addEventListener("keydown", function (e) {
-      let k = e.keyCode;
-      let ctrl = e.ctrlKey || e.metaKey;
-      if (k === 123) e.preventDefault(); // F12
-      if (ctrl && e.shiftKey && [73, 74, 67].includes(k))
-        e.preventDefault(); // Ctrl+Shift+I/J/C
-      if (ctrl && [85, 83, 80, 65].includes(k))
-        e.preventDefault(); // Ctrl+U/S/P/A
-    });
-
-
-    /* =========================
-       3 — DevTools Detection
-    ========================= */
-
-    (function () {
-      const threshold = 160;
-      function detect() {
-        let w = window.outerWidth - window.innerWidth;
-        let h = window.outerHeight - window.innerHeight;
-        if (w > threshold || h > threshold) {
-          document.body.innerHTML =
-            '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><h2>Access Restricted</h2></div>';
-        }
-      }
-      setInterval(detect, 1000);
-    })();
-    /* =========================
-       4 — Debugger Trap
-    ========================= */
-    setInterval(function () {
-      (function () { return false }
-      ['constructor']('debugger')
-      ['call']());
-    }, 50);
-
-    /* =========================
-       5 — Block Print
-    ========================= */
-    window.print = function () { return false };
-    /* =========================
-       6 — Copy Protection
-    ========================= */
-    document.addEventListener("copy", function (e) {
-      e.clipboardData.setData(
-        "text/plain",
-        "© Protected Content"
-      );
-      e.preventDefault();
-    });
-
-    /* =========================
-       7 — Screenshot Watermark Overlay
-    ========================= */
-    let overlay = document.createElement("div");
-    overlay.style.cssText =
-      "position:fixed;top:0;left:0;width:100%;height:100%;" +
-      "pointer-events:none;z-index:999999999;" +
-      "background:repeating-linear-gradient(" +
-      "45deg,transparent,transparent 10px," +
-      "rgba(255,255,255,0.02) 10px," +
-      "rgba(255,255,255,0.02) 20px);";
-    document.body.appendChild(overlay);
-    /* =========================
-       8 — Tab Switch Blur
-    ========================= */
-
-    let protectedContent = document.body;
-
-    document.addEventListener("visibilitychange", function () {
-
-      if (document.hidden) {
-
-        protectedContent.style.filter = "blur(20px)";
-
-      } else {
-
-        protectedContent.style.filter = "none";
-
-      }
-
-    });
-
-
-    /* =========================
-       9 — Iframe Protection
-    ========================= */
-
-    if (window.top !== window.self) {
-
-      window.top.location = window.self.location;
-
-    }
-
-
-    /* =========================
-       10 — DOM Injection Guard
-    ========================= */
-
-    let observer = new MutationObserver(function (mutations) {
-
-      mutations.forEach(function (m) {
-        m.addedNodes.forEach(function (node) {
-          if (node.tagName === "SCRIPT" || node.tagName === "LINK") {
-            let src = node.src || node.href || "";
-            if (src && !src.startsWith(location.origin)) {
-              node.remove();
-            }
-
-          }
-
-        });
-
-      });
-
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true
-    });
-
-
-    /* =========================
-       11 — Silence Console
-    ========================= */
-
-    let noop = function () { };
-
-    ["log", "warn", "error", "info", "debug", "table", "dir"]
-      .forEach(function (m) {
-
-        console[m] = noop;
-
-      });
-
-
-  });
-
-})();
-
 /* ================================================================
    1. UTILS
 ================================================================ */
