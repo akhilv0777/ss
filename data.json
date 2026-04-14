@@ -93,8 +93,30 @@
      { "num": "14", "title": "Crazy Memories 📸", "img": "./assets/ss (70).jpg" },
      { "num": "15", "title": "Have a Blast! 🎉", "img": "./assets/ss (71).jpg" }
    ],
-   "animatedFrame": {
-     "text": "HAPPY BIRTHDAY SAUMYA",
-     "img": "./assets/ss (72).jpg"
-    }
+   "AnimatedFrameImages": [
+    { "title": "Beautiful", "imgUrl": "./assets/ss (1).jpg" },
+    { "title": "Cute", "imgUrl": "./assets/ss (2).jpg" },
+    { "title": "Smile", "imgUrl": "./assets/ss (3).jpg" },
+    { "title": "Happy", "imgUrl": "./assets/ss (4).jpg" },
+    { "title": "Joy", "imgUrl": "./assets/ss (5).jpg" },
+    { "title": "Elegant", "imgUrl": "./assets/ss (6).jpg" },
+    { "title": "Sweet", "imgUrl": "./assets/ss (7).jpg" },
+    { "title": "Pretty", "imgUrl": "./assets/ss (8).jpg" },
+    { "title": "Radiant", "imgUrl": "./assets/ss (9).jpg" },
+    { "title": "Gorgeous", "imgUrl": "./assets/ss (10).jpg" },
+    { "title": "Lovely", "imgUrl": "./assets/ss (11).jpg" },
+    { "title": "Charming", "imgUrl": "./assets/ss (12).jpg" },
+    { "title": "Beautiful", "imgUrl": "./assets/ss (13).jpg" },
+    { "title": "Cute", "imgUrl": "./assets/ss (14).jpg" },
+    { "title": "Smile", "imgUrl": "./assets/ss (15).jpg" },
+    { "title": "Happy", "imgUrl": "./assets/ss (16).jpg" },
+    { "title": "Joy", "imgUrl": "./assets/ss (17).jpg" },
+    { "title": "Elegant", "imgUrl": "./assets/ss (18).jpg" },
+    { "title": "Sweet", "imgUrl": "./assets/ss (19).jpg" },
+    { "title": "Pretty", "imgUrl": "./assets/ss (20).jpg" },
+    { "title": "Radiant", "imgUrl": "./assets/ss (21).jpg" },
+    { "title": "Gorgeous", "imgUrl": "./assets/ss (22).jpg" },
+    { "title": "Lovely", "imgUrl": "./assets/ss (23).jpg" },
+    { "title": "Charming", "imgUrl": "./assets/ss (24).jpg" }
+  ]
 }
