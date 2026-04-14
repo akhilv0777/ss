@@ -1,206 +1,4 @@
 /* ================================================================
-   security.js — Content Protection (App-Compatible Version)
-   
-   Removed / Fixed:
-   ✗ debugger trap     → JS execution block karta tha (audio.ended break)
-   ✗ body.innerHTML wipe → poora DOM destroy hota tha
-   ✗ console noop      → apna hi error debug nahi hota tha
-   ✓ Baki sab protections intact + safer alternatives
-================================================================ */
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  /* ================================================================
-     1. RIGHT CLICK + DRAG + SELECT BLOCK
-  ================================================================ */
-  const block = e => { e.preventDefault(); e.stopPropagation(); return false; };
-  window.addEventListener("contextmenu",  block, true);
-  window.addEventListener("dragstart",    block, true);
-  window.addEventListener("selectstart",  block, true);
-
-
-  /* ================================================================
-     2. KEYBOARD SHORTCUTS BLOCK
-     (F12, Ctrl+Shift+I/J/C, Ctrl+U/S/P/A)
-  ================================================================ */
-  document.addEventListener("keydown", function (e) {
-    const k    = e.keyCode;
-    const ctrl = e.ctrlKey || e.metaKey;
-
-    if (k === 123) { e.preventDefault(); return; } // F12
-
-    if (ctrl && e.shiftKey && [73, 74, 67].includes(k)) {
-      e.preventDefault(); return; // Ctrl+Shift+I / J / C
-    }
-
-    if (ctrl && [85, 83, 80, 65].includes(k)) {
-      e.preventDefault(); // Ctrl+U / S / P / A
-    }
-  });
-
-
-  /* ================================================================
-     3. DEVTOOLS DETECTION — SAFE VERSION
-     Body wipe nahi, sirf blur + overlay dikhao
-     Jab DevTools band ho, sab wapas normal
-  ================================================================ */
-  const THRESHOLD = 160;
-
-  // Ek dedicated overlay banao (body replace nahi karna)
-  const devOverlay = document.createElement("div");
-  devOverlay.id    = "dev-block-overlay";
-  Object.assign(devOverlay.style, {
-    display:        "none",
-    position:       "fixed",
-    inset:          "0",
-    zIndex:         "999999",
-    background:     "#000",
-    alignItems:     "center",
-    justifyContent: "center",
-    flexDirection:  "column",
-    fontFamily:     "sans-serif",
-    color:          "#fff",
-    textAlign:      "center",
-  });
-  devOverlay.innerHTML = `<h2>🚫 Access Restricted</h2>
-                          <p>Please close Developer Tools to continue.</p>`;
-  document.body.appendChild(devOverlay);
-
-  function detectDevTools() {
-    const wDiff = window.outerWidth  - window.innerWidth;
-    const hDiff = window.outerHeight - window.innerHeight;
-    const open  = wDiff > THRESHOLD || hDiff > THRESHOLD;
-
-    devOverlay.style.display     = open ? "flex"  : "none";
-    document.body.style.filter   = open ? "blur(20px)" : "";
-    document.body.style.pointerEvents = open ? "none" : "";
-  }
-
-  setInterval(detectDevTools, 1500); // 1.5s — 100ms se kam aggressive
-
-
-  /* ================================================================
-     4. DEBUGGER TRAP — REMOVED ✗
-     Yeh audio.ended, setInterval, setTimeout sab block karta tha.
-     Iska koi real-world protection value nahi — devtools already
-     detect ho raha hai section 3 se.
-  ================================================================ */
-
-
-  /* ================================================================
-     5. PRINT BLOCK
-  ================================================================ */
-  window.print = () => false;
-
-  window.addEventListener("beforeprint", function (e) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-  }, true);
-
-
-  /* ================================================================
-     6. COPY PROTECTION — watermark clipboard text
-  ================================================================ */
-  document.addEventListener("copy", function (e) {
-    e.clipboardData.setData("text/plain", "© Protected Content");
-    e.preventDefault();
-  });
-
-
-  /* ================================================================
-     7. TAB SWITCH BLUR
-  ================================================================ */
-  document.addEventListener("visibilitychange", function () {
-    // DevTools overlay already visible hai toh double-apply mat karo
-    if (devOverlay.style.display === "flex") return;
-    document.body.style.filter = document.hidden ? "blur(20px)" : "";
-  });
-
-
-  /* ================================================================
-     8. IFRAME HIJACK PROTECTION
-  ================================================================ */
-  try {
-    if (window.top !== window.self) window.top.location = window.self.location;
-  } catch (e) {
-    // Cross-origin iframe — silently redirect
-    window.location = window.self.location;
-  }
-
-
-  /* ================================================================
-     9. DOM INJECTION GUARD — SAFE VERSION
-     Apne hi CDN / audio / image URLs ko block nahi kare
-     Sirf clearly external unknown scripts ko remove karo
-  ================================================================ */
-  const ALLOWED_ORIGINS = [
-    location.origin,
-    "https://cdnjs.cloudflare.com",
-    "https://fonts.googleapis.com",
-    "https://fonts.gstatic.com",
-  ];
-
-  const isAllowed = url =>
-    !url || ALLOWED_ORIGINS.some(origin => url.startsWith(origin));
-
-  const injectionObserver = new MutationObserver(function (mutations) {
-    mutations.forEach(function (m) {
-      m.addedNodes.forEach(function (node) {
-        if (node.nodeType !== 1) return; // Element nodes only
-        const tag = node.tagName?.toUpperCase();
-        if (tag === "SCRIPT" || tag === "LINK") {
-          const src = node.src || node.href || "";
-          if (src && !isAllowed(src)) node.remove();
-        }
-      });
-    });
-  });
-
-  injectionObserver.observe(document.documentElement, {
-    childList: true,
-    subtree:   true,
-  });
-
-
-  /* ================================================================
-     10. CONSOLE — REMOVED FULL NOOP ✗
-     Full noop se apna hi code debug nahi hota tha.
-     Sirf production mein selective silence (error retain karo).
-  ================================================================ */
-  const noop = () => {};
-  // Sirf verbose methods band karo, error/warn chalne do apne liye
-  ["log", "info", "debug", "table", "dir"].forEach(m => {
-    console[m] = noop;
-  });
-  // console.error aur console.warn intentionally rakhe hain
-  // taaki music player / fetch errors track ho sakein
-
-
-  /* ================================================================
-     11. SOURCE MAP DISABLE (BONUS)
-     Browser ko source map fetch karne se rokta hai
-  ================================================================ */
-  // Already handled by server — no //# sourceMappingURL in production
-
-
-  /* ================================================================
-     12. SCREENSHOT / SCREEN CAPTURE HINT (BONUS)
-     CSS-only — screenshot tools ko confuse karta hai
-  ================================================================ */
-  const styleEl = document.createElement("style");
-  styleEl.textContent = `
-    @media print {
-      body { display: none !important; }
-    }
-    ::selection {
-      background: transparent;
-      color: inherit;
-    }
-  `;
-  document.head.appendChild(styleEl);
-
-});
-/* ================================================================
    main.js — Fully Optimized & Reusable
    Architecture:
      1. Utils        — Tiny helpers used everywhere
@@ -490,62 +288,97 @@ function renderSpinner(spinner) {
 }
 
 function initSpinner() {
-  const IMG_W = 120, IMG_H = 170, RADIUS = 240, SPIN_SPEED = -60;
+  const radius = 240; 
+  const rotateSpeed = -60; 
+  const imgWidth = 120; 
+  const imgHeight = 170; 
 
-  const spinContainer = byId('spin-container');
-  const dragContainer = byId('drag-container');
-  const spinSection   = byId('spinSection');
-  const images        = spinContainer?.getElementsByTagName('img');
-  if (!images?.length) return;
+  const spinSection = document.getElementById('spinSection');
+  const odrag = document.getElementById('drag-container');
+  const ospin = document.getElementById('spin-container');
+  
+  if (!ospin || !odrag || !spinSection) return;
 
-  spinContainer.style.width  = `${IMG_W}px`;
-  spinContainer.style.height = `${IMG_H}px`;
+  const aImg = ospin.getElementsByTagName('img');
+  const aVid = ospin.getElementsByTagName('video');
+  const aEle = [...aImg, ...aVid];
 
-  // Arrange images in a circle
-  const arrange = (delay) => {
-    Array.from(images).forEach((img, i) => {
-      img.style.transform      = `rotateY(${i * (360 / images.length)}deg) translateZ(${RADIUS}px)`;
-      img.style.transition     = 'transform 1s';
-      img.style.transitionDelay = delay ?? `${(images.length - i) / 4}s`;
-    });
-  };
-  setTimeout(arrange, 1000);
+  // Size of images
+  ospin.style.width = imgWidth + "px";
+  ospin.style.height = imgHeight + "px";
 
-  spinContainer.style.animation = `${SPIN_SPEED > 0 ? 'spin' : 'spinRevert'} ${Math.abs(SPIN_SPEED)}s infinite linear`;
+  // Size of ground
+  const ground = document.getElementById('ground');
+  if (ground) {
+    ground.style.width = radius * 3 + "px";
+    ground.style.height = radius * 3 + "px";
+  }
 
-  let tX = 0, tY = 10, desX = 0, desY = 0, sX, sY;
+  // Animation Start
+  function init(delayTime) {
+    for (let i = 0; i < aEle.length; i++) {
+      aEle[i].style.transform = `rotateY(${i * (360 / aEle.length)}deg) translateZ(${radius}px)`;
+      aEle[i].style.transition = "transform 1s";
+      aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + "s";
+    }
+  }
+  setTimeout(() => init(), 1000);
 
-  const applyTransform = () => {
-    tY = utils.clamp(tY, 0, 180);
-    dragContainer.style.transform = `rotateX(${-tY}deg) rotateY(${tX}deg)`;
-  };
+  let sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
 
-  attachDrag(spinSection, {
-    onStart: ({ clientX, clientY }) => {
-      clearInterval(dragContainer.timer);
-      sX = clientX; sY = clientY;
-    },
-    onMove: ({ clientX, clientY }) => {
-      desX = clientX - sX; desY = clientY - sY;
-      tX += desX * 0.1;   tY += desY * 0.1;
-      applyTransform();
-      sX = clientX; sY = clientY;
-    },
-    onEnd: () => {
-      dragContainer.timer = setInterval(() => {
-        desX *= 0.95; desY *= 0.95;
-        tX   += desX * 0.1; tY += desY * 0.1;
-        applyTransform();
-        spinContainer.style.animationPlayState = 'paused';
+  // Auto spin
+  const animationName = (rotateSpeed > 0 ? 'spin' : 'spinRevert');
+  ospin.style.animation = `${animationName} ${Math.abs(rotateSpeed)}s infinite linear`;
 
+  function applyTransform(obj) {
+    if(tY > 180) tY = 180;
+    if(tY < 0) tY = 0;
+    obj.style.transform = `rotateX(${-tY}deg) rotateY(${tX}deg)`;
+  }
+
+  function playSpin(yes) {
+    ospin.style.animationPlayState = (yes ? 'running' : 'paused');
+  }
+
+  spinSection.onpointerdown = function (e) {
+    clearInterval(odrag.timer);
+    e = e || window.event;
+    sX = e.clientX;
+    sY = e.clientY;
+
+    document.onpointermove = function (e) {
+      e = e || window.event;
+      nX = e.clientX;
+      nY = e.clientY;
+      desX = nX - sX;
+      desY = nY - sY;
+      tX += desX * 0.1;
+      tY += desY * 0.1;
+      applyTransform(odrag);
+      sX = nX;
+      sY = nY;
+    };
+
+    document.onpointerup = function (e) {
+      odrag.timer = setInterval(function () {
+        desX *= 0.95;
+        desY *= 0.95;
+        tX += desX * 0.1;
+        tY += desY * 0.1;
+        applyTransform(odrag);
+        playSpin(false);
+        
         if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
-          clearInterval(dragContainer.timer);
-          spinContainer.style.animationPlayState = 'running';
+          clearInterval(odrag.timer);
+          playSpin(true);
         }
       }, 17);
-    },
-  });
+      document.onpointermove = document.onpointerup = null;
+    };
+    return false;
+  };
 }
+
 
 
 /* ================================================================
