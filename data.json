@@ -60,9 +60,9 @@
       "./assets/ss (19).jpg"
     ],
     "musicList": [
+      { "name": "Cute Background Music 3", "src": "./assets/music3.mp3" },
       { "name": "Somu Special Song 1", "src": "./assets/music.mp3" },
-      { "name": "Cute Background Music", "src": "./assets/music2.mp3" },
-      { "name": "Cute Background Music 3", "src": "./assets/music3.mp3" }
+      { "name": "Cute Background Music", "src": "./assets/music2.mp3" }
     ],
     "magicalGallery": [
      { "id": "vid_1", "type": "video", "src": "./assets/ss (1).mp4", "frontNote": "Our Funniest Moment 🎥", "backNote": "This hilarious moment will always be cherished! 😂", "isMain": true },
