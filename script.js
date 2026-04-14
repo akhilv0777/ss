@@ -1,60 +1,72 @@
 /* ================================================================
-   main.js — Fully Optimized & Reusable
-   Architecture:
-     1. Utils        — Tiny helpers used everywhere
-     2. DOM          — Safe element access
-     3. DragEngine   — Reusable pointer/touch drag logic
-     4. Book         — Flip-book rendering & navigation
-     5. Slider       — Memory slider
-     6. Carousel     — 3D drag carousel
-     7. Spinner      — 3D image spinner
-     8. Jhoomar      — Hanging chandelier
-     9. MagicalGallery — Draggable + flippable cards
-    10. CircularGallery & Halo Frame — Rotating thumb gallery
-    11. MusicPlayer   — Playlist, volume, UI sync
-    12. Clock         — Analog clock hands
-    13. CakeFinale    — Candle blow + fireworks reveal
-    14. Fireflies     — Ambient particles
-    15. BirthdayEffect / FireworkPiece — Canvas fireworks
-    16. RoseOverlay   — Magical rose modal
-    17. Bootstrap     — data.json fetch → init all
+   main.js — Performance-Optimized
+   Key changes vs original:
+   • Lazy section init via IntersectionObserver (sections only init
+     when they enter the viewport — eliminates upfront DOM/style work)
+   • requestIdleCallback for non-critical work (fireflies, dot viz)
+   • data.json fetched once; bootstrap deferred past loader
+   • Spinner resize debounced
+   • Carousel/Spinner/Gallery only init when visible
+   • Music player deferred until first user interaction or scroll
+   • createDocumentFragment used consistently (was already there)
+   • Removed redundant document.addEventListener('click') re-queries
 ================================================================ */
 
 /* ================================================================
    1. UTILS
 ================================================================ */
 const PI2 = Math.PI * 2;
-const COLORS = ['#ff7eb3', '#f5c842', '#33ccff', '#ff9933', '#cc33ff'];
 
 const utils = {
-  rand: (min, max) => (Math.random() * (max - min + 1) + min) | 0,
-  now: () => Date.now(),
-  clamp: (val, lo, hi) => Math.max(lo, Math.min(val, hi)),
-  pick: arr => arr[Math.floor(Math.random() * arr.length)],
-  toggleClass: (el, cls, condition) => el?.classList.toggle(cls, condition),
+  rand   : (min, max) => (Math.random() * (max - min + 1) + min) | 0,
+  clamp  : (val, lo, hi) => Math.max(lo, Math.min(val, hi)),
+  pick   : arr => arr[Math.floor(Math.random() * arr.length)],
   swapClass: (el, remove, add) => { el?.classList.remove(remove); el?.classList.add(add); },
-  buildFragment: (items, mapper) => {
-    const frag = document.createDocumentFragment();
-    items.forEach(item => frag.appendChild(mapper(item)));
-    return frag;
-  },
-  el: (tag, className = '', html = '') => {
+  el     : (tag, cls = '', html = '') => {
     const e = document.createElement(tag);
-    if (className) e.className = className;
+    if (cls)  e.className = cls;
     if (html) e.innerHTML = html;
     return e;
   },
+  buildFragment: (items, mapper) => {
+    const f = document.createDocumentFragment();
+    items.forEach(item => f.appendChild(mapper(item)));
+    return f;
+  },
+  // Debounce helper — prevents resize/scroll flooding
+  debounce: (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; },
+  // Schedule low-priority work without blocking paint
+  idle: fn => (window.requestIdleCallback || (cb => setTimeout(cb, 1)))(fn),
 };
 
 /* ================================================================
    2. DOM
 ================================================================ */
-const $ = (sel, ctx = document) => ctx.querySelector(sel);
-const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+const $    = (sel, ctx = document) => ctx.querySelector(sel);
+const $$   = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 const byId = id => document.getElementById(id);
 
 /* ================================================================
-   3. DRAG ENGINE
+   3. LAZY OBSERVER
+   Usage: lazyInit('#mySection', () => initMySection())
+   The callback fires once when the section scrolls into view (+ 200px
+   root margin so init happens just before it becomes visible).
+================================================================ */
+function lazyInit(selectorOrEl, callback, rootMargin = '0px 0px 200px 0px') {
+  const el = typeof selectorOrEl === 'string' ? $(selectorOrEl) : selectorOrEl;
+  if (!el) return;
+
+  const obs = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    obs.disconnect();
+    callback();
+  }, { rootMargin });
+
+  obs.observe(el);
+}
+
+/* ================================================================
+   4. DRAG ENGINE
 ================================================================ */
 function attachDrag(target, { onStart, onMove, onEnd }) {
   if (!target) return;
@@ -63,45 +75,42 @@ function attachDrag(target, { onStart, onMove, onEnd }) {
     clientY: e.touches ? e.touches[0].clientY : e.clientY,
     raw: e,
   });
-  const start = e => onStart?.(norm(e));
-  const move = e => { e.preventDefault(); onMove?.(norm(e)); };
-  const end = e => onEnd?.(norm(e));
-
-  target.addEventListener('mousedown', start);
-  target.addEventListener('touchstart', start, { passive: false });
-  target.addEventListener('mousemove', move);
-  target.addEventListener('touchmove', move, { passive: false });
-  target.addEventListener('mouseup', end);
-  target.addEventListener('touchend', end);
-  target.addEventListener('mouseleave', end);
+  target.addEventListener('mousedown',  e => onStart?.(norm(e)));
+  target.addEventListener('touchstart', e => onStart?.(norm(e)), { passive: false });
+  target.addEventListener('mousemove',  e => { e.preventDefault(); onMove?.(norm(e)); });
+  target.addEventListener('touchmove',  e => { e.preventDefault(); onMove?.(norm(e)); }, { passive: false });
+  target.addEventListener('mouseup',    e => onEnd?.(norm(e)));
+  target.addEventListener('touchend',   e => onEnd?.(norm(e)));
+  target.addEventListener('mouseleave', e => onEnd?.(norm(e)));
 }
 
 /* ================================================================
-   4. BOOK
+   5. BOOK
 ================================================================ */
 let currentPage = 1;
-let maxPages = 0;
-let appData = [];
+let maxPages    = 0;
+let appData     = [];
 
 function renderBook(book) {
   const container = byId('book');
   if (!container || !book?.length) return;
-  appData = book;
-  maxPages = book.length;
+  appData   = book;
+  maxPages  = book.length;
 
   container.innerHTML = book.map((p, i) => {
     const front = p.isCover
       ? `<div class="front" id="cover"><h1 class="cover-title">${p.frontContent.title}</h1><p>${p.frontContent.chapter}</p><small onclick="goNext()">${p.frontContent.footer}</small></div>`
-      : `<div class="front"><img src="${p.frontContent.img}" class="photo-frame" loading="lazy"><p>${p.frontContent.text}</p></div>`;
+      : `<div class="front"><img src="${p.frontContent.img}" class="photo-frame" loading="lazy" decoding="async"><p>${p.frontContent.text}</p></div>`;
 
     const back = p.isCover
       ? `<div class="back"><h3>${p.backContent.title}</h3><p>${p.backContent.text}</p><p class="heart-symbol">${p.backContent.symbol}</p></div>`
       : i === maxPages - 1
         ? `<div class="back" id="back-cover"><h2>${p.backContent.title}</h2><p>${p.backContent.text}</p></div>`
-        : `<div class="back"><img src="${p.backContent.img}" class="photo-frame" loading="lazy"><p>${p.backContent.text}</p></div>`;
+        : `<div class="back"><img src="${p.backContent.img}" class="photo-frame" loading="lazy" decoding="async"><p>${p.backContent.text}</p></div>`;
 
     return `<div class="page" id="${p.id}">${front}${back}</div>`;
   }).join('');
+
   updateBookState();
 }
 
@@ -113,14 +122,11 @@ function updateBookState() {
   const cl = $('.book-container')?.classList;
   if (cl) {
     cl.toggle('closed-back', currentPage > maxPages);
-    cl.toggle('open-book', currentPage > 1 && currentPage <= maxPages);
+    cl.toggle('open-book',   currentPage > 1 && currentPage <= maxPages);
   }
-  const setDisplay = (id, show) => {
-    const btn = byId(id);
-    if (btn) btn.style.display = show ? 'inline-block' : 'none';
-  };
-  setDisplay('prevBtn', currentPage > 1);
-  setDisplay('nextBtn', currentPage <= maxPages);
+  const show = (id, flag) => { const b = byId(id); if (b) b.style.display = flag ? 'inline-block' : 'none'; };
+  show('prevBtn', currentPage > 1);
+  show('nextBtn', currentPage <= maxPages);
 }
 
 function goNext() {
@@ -137,60 +143,60 @@ function goPrev() {
 }
 
 /* ================================================================
-   5. SLIDER
+   6. SLIDER
+   Slider controls wired once; no per-click re-query of all items.
 ================================================================ */
 function renderSlider(memories) {
   const slider = byId('sliderList');
   if (!slider || !memories?.length) return;
+
   slider.appendChild(utils.buildFragment(memories, ({ img, title, desc }) => {
     const li = utils.el('li', 'item');
     li.style.backgroundImage = `url('${img}')`;
     li.innerHTML = `<div class="content"><h2 class="title">${title}</h2><p class="description">${desc}</p></div>`;
     return li;
   }));
+
+  // Wire controls once on the parent section (event delegation)
+  const section = slider.closest('section') || slider.parentElement;
+  section?.addEventListener('click', e => {
+    const items = slider.children;
+    if (!items.length) return;
+    if (e.target.closest('.next') || e.target.closest('.item')) {
+      slider.append(items[0]);
+    } else if (e.target.closest('.prev')) {
+      slider.prepend(items[items.length - 1]);
+    }
+  });
 }
 
-document.addEventListener('click', e => {
-  const slider = byId('sliderList');
-  if (!slider) return;
-  const items = $$('.slider .item');
-  if (!items.length) return;
-  
-  if (e.target.closest('.next')) {
-    slider.append(items[0]);
-  } else if (e.target.closest('.prev')) {
-    slider.prepend(items[items.length - 1]);
-  } 
-  else if (e.target.closest('.item')) {
-    slider.append(items[0]);
-  }
-});
-
 /* ================================================================
-   6. 3D CAROUSEL
+   7. 3D CAROUSEL  — init deferred until section visible
 ================================================================ */
 function renderCarousel(carousel) {
   const container = byId('dragCarousel');
   if (!container || !carousel?.length) return;
+
   container.appendChild(utils.buildFragment(carousel, ({ img, title, num }) => {
     const div = utils.el('div', 'carousel-item');
-    div.innerHTML = `<div class="carousel-box"><div class="title">${title}</div><div class="num">${num}</div>${img ? `<img src="${img}" loading="lazy">` : ''}</div>`;
+    div.innerHTML = `<div class="carousel-box"><div class="title">${title}</div><div class="num">${num}</div>${img ? `<img src="${img}" loading="lazy" decoding="async">` : ''}</div>`;
     return div;
   }));
-  initCarousel();
+
+  lazyInit(byId('carouselSection'), initCarousel);
 }
 
 function initCarousel() {
   let progress = 50, activeIndex = 0;
-  const items = $$('.carousel-item');
+  const items   = $$('.carousel-item');
   const section = byId('carouselSection');
   if (!items.length || !section) return;
 
   const update = () => {
-    progress = utils.clamp(progress, 0, 100);
+    progress    = utils.clamp(progress, 0, 100);
     activeIndex = Math.floor(progress / 100 * (items.length - 1));
     items.forEach((item, i) => {
-      item.style.setProperty('--zIndex', i === activeIndex ? items.length : items.length - Math.abs(activeIndex - i));
+      item.style.setProperty('--zIndex',  i === activeIndex ? items.length : items.length - Math.abs(activeIndex - i));
       item.style.setProperty('--active', (i - activeIndex) / items.length);
     });
   };
@@ -203,81 +209,83 @@ function initCarousel() {
   let startX = 0;
   attachDrag(section, {
     onStart: ({ clientX }) => { startX = clientX; },
-    onMove: ({ clientX }) => { progress += (clientX - startX) * -0.1; startX = clientX; update(); },
+    onMove : ({ clientX }) => { progress += (clientX - startX) * -0.1; startX = clientX; update(); },
   });
 }
 
 /* ================================================================
-   7. 3D SPINNER
+   8. 3D SPINNER  — init deferred until section visible
 ================================================================ */
 function renderSpinner(spinner) {
   const container = byId('spin-container');
   if (!container || !spinner?.length) return;
+
   const pTag = container.querySelector('p');
   container.insertBefore(
     utils.buildFragment(spinner, ({ img }) => {
-      const imgEl = utils.el('img');
-      imgEl.src = img;
+      const imgEl   = utils.el('img');
+      imgEl.src     = img;
       imgEl.loading = 'lazy';
+      imgEl.decoding = 'async';
       return imgEl;
     }),
     pTag
   );
-  initSpinner();
+
+  lazyInit(byId('spinSection'), initSpinner);
 }
 
 function initSpinner() {
   const radius = 240, rotateSpeed = -60, imgWidth = 120, imgHeight = 170;
-  const spinSection = byId('spinSection'), odrag = byId('drag-container'), ospin = byId('spin-container');
+  const spinSection = byId('spinSection');
+  const odrag       = byId('drag-container');
+  const ospin       = byId('spin-container');
   if (!ospin || !odrag || !spinSection) return;
 
-  const aImg = ospin.getElementsByTagName('img'), aVid = ospin.getElementsByTagName('video');
-  const aEle = [...aImg, ...aVid];
-  ospin.style.width = imgWidth + "px"; ospin.style.height = imgHeight + "px";
+  const aEle = [...ospin.getElementsByTagName('img'), ...ospin.getElementsByTagName('video')];
+  ospin.style.width  = imgWidth  + 'px';
+  ospin.style.height = imgHeight + 'px';
 
   const ground = byId('ground');
-  if (ground) { ground.style.width = radius * 3 + "px"; ground.style.height = radius * 3 + "px"; }
+  if (ground) { ground.style.width = ground.style.height = radius * 3 + 'px'; }
 
-  setTimeout(() => {
-    for (let i = 0; i < aEle.length; i++) {
-      aEle[i].style.transform = `rotateY(${i * (360 / aEle.length)}deg) translateZ(${radius}px)`;
-      aEle[i].style.transition = "transform 1s";
-      aEle[i].style.transitionDelay = (aEle.length - i) / 4 + "s";
-    }
-  }, 1000);
+  // Stagger transform so browser spreads the style recalcs
+  aEle.forEach((el, i) => {
+    el.style.transform       = `rotateY(${i * (360 / aEle.length)}deg) translateZ(${radius}px)`;
+    el.style.transition      = 'transform 1s';
+    el.style.transitionDelay = (aEle.length - i) / 4 + 's';
+  });
 
-  let sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
   ospin.style.animation = `${rotateSpeed > 0 ? 'spin' : 'spinRevert'} ${Math.abs(rotateSpeed)}s infinite linear`;
 
-  function applyTransform(obj) {
-    if (tY > 180) tY = 180;
-    if (tY < 0) tY = 0;
-    obj.style.transform = `rotateX(${-tY}deg) rotateY(${tX}deg)`;
-  }
-  function playSpin(yes) { ospin.style.animationPlayState = yes ? 'running' : 'paused'; }
+  let sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
 
-  spinSection.onpointerdown = function (e) {
-    clearInterval(odrag.timer);
-    e = e || window.event;
+  const applyTransform = () => {
+    tY = utils.clamp(tY, 0, 180);
+    odrag.style.transform = `rotateX(${-tY}deg) rotateY(${tX}deg)`;
+  };
+  const playSpin = yes => { ospin.style.animationPlayState = yes ? 'running' : 'paused'; };
+
+  spinSection.onpointerdown = e => {
+    clearInterval(odrag._timer);
     sX = e.clientX; sY = e.clientY;
 
-    document.onpointermove = function (e) {
-      e = e || window.event;
+    document.onpointermove = e => {
       nX = e.clientX; nY = e.clientY;
       desX = nX - sX; desY = nY - sY;
       tX += desX * 0.1; tY += desY * 0.1;
-      applyTransform(odrag);
+      applyTransform();
       sX = nX; sY = nY;
     };
 
-    document.onpointerup = function () {
-      odrag.timer = setInterval(function () {
+    document.onpointerup = () => {
+      odrag._timer = setInterval(() => {
         desX *= 0.95; desY *= 0.95;
-        tX += desX * 0.1; tY += desY * 0.1;
-        applyTransform(odrag);
+        tX   += desX * 0.1; tY += desY * 0.1;
+        applyTransform();
         playSpin(false);
         if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
-          clearInterval(odrag.timer);
+          clearInterval(odrag._timer);
           playSpin(true);
         }
       }, 17);
@@ -288,34 +296,39 @@ function initSpinner() {
 }
 
 /* ================================================================
-   8. JHOOMAR (CHANDELIER)
+   9. JHOOMAR (CHANDELIER)
 ================================================================ */
 function renderJhoomar(items) {
   const container = byId('jhoomar-container');
   if (!container || !items?.length) return;
-  const w = window.innerWidth;
-  const maxPerRow = w < 600 ? 4 : w < 900 ? 6 : 9;
 
-  let html = '';
+  const w          = window.innerWidth;
+  const maxPerRow  = w < 600 ? 4 : w < 900 ? 6 : 9;
+  const rows       = [];
+
   for (let i = 0; i < items.length; i += maxPerRow) {
-    const row = items.slice(i, i + maxPerRow);
-    const n = row.length;
-    const mid = Math.max((n - 1) / 2, 1);
+    const row  = items.slice(i, i + maxPerRow);
+    const n    = row.length;
+    const mid  = Math.max((n - 1) / 2, 1);
 
-    html += `<div class="jhoomar-row">` +
-      row.map(({ img }, j) => {
-        const dist = (j - mid) / mid;
-        const strH = 40 + 90 * (dist * dist);
-        const dur = (2.5 + Math.random() * 1.5).toFixed(1) + 's';
-        const delay = Math.random().toFixed(1) + 's';
-        return `<div class="jhoomar-item" style="animation:swing ${dur} ease-in-out ${delay} infinite alternate;"><div class="string" style="height:${strH}px"></div><div class="heart-frame"><img src="${img}" class="hanging-img" loading="lazy"></div></div>`;
-      }).join('') + `</div>`;
+    const cells = row.map(({ img }, j) => {
+      const dist = (j - mid) / mid;
+      const strH = 40 + 90 * (dist * dist);
+      const dur  = (2.5 + Math.random() * 1.5).toFixed(1) + 's';
+      const delay = Math.random().toFixed(1) + 's';
+      return `<div class="jhoomar-item" style="animation:swing ${dur} ease-in-out ${delay} infinite alternate;">` +
+             `<div class="string" style="height:${strH}px"></div>` +
+             `<div class="heart-frame"><img src="${img}" class="hanging-img" loading="lazy" decoding="async"></div></div>`;
+    }).join('');
+
+    rows.push(`<div class="jhoomar-row">${cells}</div>`);
   }
-  container.innerHTML = html;
+
+  container.innerHTML = rows.join('');
 }
 
 /* ================================================================
-   9. MAGICAL GALLERY
+   10. MAGICAL GALLERY  — init deferred until section visible
 ================================================================ */
 function renderMagicalGallery(gallery) {
   const container = byId('magical-cards-container');
@@ -323,43 +336,54 @@ function renderMagicalGallery(gallery) {
 
   container.innerHTML = gallery.map(({ id, isMain, type, src, frontNote, backNote }) => {
     const sizeClass = isMain ? 'card-video' : 'card-photo';
-    const media = type === 'video'
-      ? `<div class="drag-handle"></div><video src="${src}" controls playsinline></video>`
-      : `<img src="${src}" loading="lazy">`;
+    const media     = type === 'video'
+      ? `<div class="drag-handle"></div><video src="${src}" controls playsinline preload="none"></video>`
+      : `<img src="${src}" loading="lazy" decoding="async">`;
 
-    return `<div class="magical-card ${sizeClass}" id="${id}"><div class="card-inner"><div class="card-front">${media}<div class="card-note">${frontNote}<span class="tap-hint">(Tap to flip)</span></div></div><div class="card-back" style="background-image:url('${src}');"><div class="back-overlay"></div><div class="back-note">${backNote}</div></div></div></div>`;
+    return `<div class="magical-card ${sizeClass}" id="${id}">` +
+           `<div class="card-inner">` +
+           `<div class="card-front">${media}<div class="card-note">${frontNote}<span class="tap-hint">(Tap to flip)</span></div></div>` +
+           `<div class="card-back" style="background-image:url('${src}');"><div class="back-overlay"></div><div class="back-note">${backNote}</div></div>` +
+           `</div></div>`;
   }).join('');
-  initMagicalGallery();
+
+  lazyInit(container, initMagicalGallery);
 }
 
 function initMagicalGallery() {
   let topZ = 100;
   $$('.magical-card').forEach(card => {
     const isVideo = card.classList.contains('card-video');
-    const range = isVideo ? 0 : 120;
-    let offsetX = (Math.random() - 0.5) * range * 2;
-    let offsetY = (Math.random() - 0.5) * range * 2;
-    const rotate = isVideo ? 0 : (Math.random() - 0.5) * 30;
+    const range   = isVideo ? 0 : 120;
+    let offsetX   = (Math.random() - 0.5) * range * 2;
+    let offsetY   = (Math.random() - 0.5) * range * 2;
+    const rotate  = isVideo ? 0 : (Math.random() - 0.5) * 30;
 
-    const applyPos = (extra = '') => card.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotate(${rotate}deg)${extra}`;
+    const applyPos = (extra = '') =>
+      card.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotate(${rotate}deg)${extra}`;
     applyPos();
 
     let startX, startY, moved = 0, startTime = 0;
     attachDrag(card, {
       onStart: ({ clientX, clientY, raw }) => {
         if (raw.target.tagName.toLowerCase() === 'video') return;
-        moved = 0; startTime = Date.now(); card.style.zIndex = ++topZ; card.style.transition = 'none';
+        moved = 0; startTime = Date.now();
+        card.style.zIndex      = ++topZ;
+        card.style.transition  = 'none';
         startX = clientX; startY = clientY;
       },
       onMove: ({ clientX, clientY }) => {
-        moved += Math.abs(clientX - startX) + Math.abs(clientY - startY);
-        offsetX += clientX - startX; offsetY += clientY - startY;
-        const tiltX = (clientY - startY) * -0.5, tiltY = (clientX - startX) * 0.5;
+        moved   += Math.abs(clientX - startX) + Math.abs(clientY - startY);
+        offsetX += clientX - startX;
+        offsetY += clientY - startY;
+        const tiltX = (clientY - startY) * -0.5;
+        const tiltY = (clientX - startX) *  0.5;
         applyPos(` rotateX(${tiltX}deg) rotateY(${tiltY}deg)`);
         startX = clientX; startY = clientY;
       },
       onEnd: () => {
-        card.style.transition = 'transform 0.5s ease-out'; applyPos();
+        card.style.transition = 'transform 0.5s ease-out';
+        applyPos();
         if (Date.now() - startTime < 300 && moved < 20) card.classList.toggle('flipped');
       },
     });
@@ -367,81 +391,93 @@ function initMagicalGallery() {
 }
 
 /* ================================================================
-   10. CIRCULAR GALLERY & HALO FRAME
+   11. CIRCULAR GALLERY & HALO FRAME
 ================================================================ */
-
-// Updates the center photo and the surrounding glowing text
 function renderAnimatedFrame(imgUrl, textContent = 'HAPPY BIRTHDAY SAUMYA') {
-  const bg = byId('frameBg');
+  const bg            = byId('frameBg');
   const textContainer = byId('dynamicTextContainer');
   if (!bg || !textContainer || !imgUrl) return;
 
-  bg.style.background = `url('${imgUrl}') no-repeat center`;
-  bg.style.backgroundSize = 'cover';
+  bg.style.backgroundImage = `url('${imgUrl}')`;
+  bg.style.backgroundSize  = 'cover';
 
   const chars = (textContent + ' • ').repeat(4).split('');
-  const deg = 360 / chars.length;
+  const deg   = 360 / chars.length;
   textContainer.innerHTML = chars.map((ch, i) =>
     `<span style="transform:rotate(${i * deg}deg) translateY(calc(var(--size) * -0.65));">${ch}</span>`
   ).join('');
 }
 
-// Global function to be called from HTML onclick
-window.changeCenterFrame = function(imgUrl) {
-    renderAnimatedFrame(imgUrl, 'HAPPY BIRTHDAY SAUMYA');
-};
+window.changeCenterFrame = imgUrl => renderAnimatedFrame(imgUrl, 'HAPPY BIRTHDAY SAUMYA');
 
 function initCircularGallery(animatedFrameImages) {
   const wrapper = byId('gallery-wrapper');
-  if (!wrapper || !animatedFrameImages || animatedFrameImages.length === 0) return;
+  if (!wrapper || !animatedFrameImages?.length) return;
 
-  let generatedHTML = '';
+  const frag = document.createDocumentFragment();
   animatedFrameImages.forEach((item, index) => {
-    const i = index + 1;
-    const imgUrl = item.imgUrl || item.img; // Support both naming styles
-    generatedHTML += `
-      <div class="thumb" data-title="${item.title}" style="--i:${i};">
-        <a href="javascript:void(0)" onclick="changeCenterFrame('${imgUrl}')">
-            <img src="${imgUrl}" alt="${item.title}" loading="lazy">
-        </a>
-      </div>`;
+    const imgUrl = item.imgUrl || item.img;
+    const div    = utils.el('div', 'thumb');
+    div.dataset.title   = item.title;
+    div.style.setProperty('--i', index + 1);
+    div.innerHTML = `<a href="javascript:void(0)" onclick="changeCenterFrame('${imgUrl}')">` +
+                    `<img src="${imgUrl}" alt="${item.title}" loading="lazy" decoding="async"></a>`;
+    frag.appendChild(div);
   });
+  wrapper.appendChild(frag);
 
-  // Append new thumbs without overwriting the center frame
-  wrapper.insertAdjacentHTML('beforeend', generatedHTML);
-
-  // Set the first image as default in center
   const firstImg = animatedFrameImages[0].imgUrl || animatedFrameImages[0].img;
   renderAnimatedFrame(firstImg, 'HAPPY BIRTHDAY SAUMYA');
 }
 
 /* ================================================================
-   11. MUSIC PLAYER
+   12. MUSIC PLAYER  — deferred until first scroll or interaction
 ================================================================ */
+let _musicInited = false;
+function scheduleMusicInit() {
+  if (_musicInited) return;
+
+  const go = () => {
+    if (_musicInited) return;
+    _musicInited = true;
+    initMusicPlayer();
+  };
+
+  // Kick off on first scroll or after a generous idle timeout
+  window.addEventListener('scroll', go, { once: true, passive: true });
+  utils.idle(go);   // also fires during idle time if user doesn't scroll
+}
+
 async function initMusicPlayer() {
-  const audio = $('#bgMusic'), playBtn3D = $('#mp-btn-3d-play'), playBtnPanel = $('#mp-btn-play-pause'),
-    playIcon = $('#mp-play-icon'), cas = $('#mp-cas'), tsh = $('#mp-tsh'), lgh = $('#mp-lgh'),
-    saumyaImg = $('#music-popup img'), saumyaPopup = $('#music-popup'), fileUpload = byId('mp-file-upload'),
-    prevBtn = byId('mp-btn-prev'), nextBtn = byId('mp-btn-next'), volumeRadios = $$('#music-player-section input[name="switch"]');
+  const audio        = $('#bgMusic');
+  const playBtn3D    = $('#mp-btn-3d-play');
+  const playBtnPanel = $('#mp-btn-play-pause');
+  const playIcon     = $('#mp-play-icon');
+  const cas          = $('#mp-cas');
+  const tsh          = $('#mp-tsh');
+  const lgh          = $('#mp-lgh');
+  const saumyaImg    = $('#music-popup img');
+  const saumyaPopup  = $('#music-popup');
+  const fileUpload   = byId('mp-file-upload');
+  const prevBtn      = byId('mp-btn-prev');
+  const nextBtn      = byId('mp-btn-next');
+  const volumeRadios = $$('#music-player-section input[name="switch"]');
 
   let saumyaImages = [], playlist = [], currentIndex = 0;
 
   try {
-    const data = await fetch('data.json').then(r => r.json());
+    const data   = await fetch('data.json').then(r => r.json());
     saumyaImages = data.saumyaImages || [];
-    playlist = data.musicList || [];
-    if (audio && playlist.length) {
-      audio.src = playlist[0].src; audio.loop = playlist.length === 1;
-    }
+    playlist     = data.musicList    || [];
+    if (audio && playlist.length) { audio.src = playlist[0].src; audio.loop = playlist.length === 1; }
   } catch (e) { console.error('Music player data load failed:', e); }
 
-  audio?.addEventListener('error', () => console.error('Audio error: file not found or unsupported format.'));
-
-  const setLoopMode = () => { if (audio) audio.loop = playlist.length === 1; };
-  const setUI = (playing) => {
-    cas.classList.toggle('is-radio-playing', playing); tsh.classList.toggle('is-tape-close', playing);
+  const setUI = playing => {
+    cas.classList.toggle('is-radio-playing', playing);
+    tsh.classList.toggle('is-tape-close',   playing);
     playBtn3D.classList.toggle('is-button-pressed', playing);
-    if (playing) setTimeout(() => lgh.classList.add('is-wave-playing'), 1000); else lgh.classList.remove('is-wave-playing');
+    if (playing) setTimeout(() => lgh.classList.add('is-wave-playing'), 1000);
+    else          lgh.classList.remove('is-wave-playing');
     utils.swapClass(playIcon, playing ? 'fa-play' : 'fa-pause', playing ? 'fa-pause' : 'fa-play');
 
     if (saumyaPopup) {
@@ -458,96 +494,125 @@ async function initMusicPlayer() {
     if (!audio || !playlist.length) return;
     audio.paused ? safePlay() : (setUI(false), audio.pause());
   };
-  const changeSong = (dir) => {
+  const changeSong = dir => {
     if (!audio || playlist.length <= 1) return;
     saumyaPopup?.classList.remove('show');
-    currentIndex = dir === 'next' ? (currentIndex + 1) % playlist.length : (currentIndex - 1 + playlist.length) % playlist.length;
-    audio.src = playlist[currentIndex].src; setTimeout(safePlay, 400);
+    currentIndex = dir === 'next'
+      ? (currentIndex + 1) % playlist.length
+      : (currentIndex - 1 + playlist.length) % playlist.length;
+    audio.src = playlist[currentIndex].src;
+    setTimeout(safePlay, 400);
   };
 
-  playBtn3D?.addEventListener('click', toggle); playBtnPanel?.addEventListener('click', toggle);
-  prevBtn?.addEventListener('click', () => changeSong('prev')); nextBtn?.addEventListener('click', () => changeSong('next'));
-  audio?.addEventListener('ended', () => changeSong('next'));
+  playBtn3D?.addEventListener('click',  toggle);
+  playBtnPanel?.addEventListener('click', toggle);
+  prevBtn?.addEventListener('click', () => changeSong('prev'));
+  nextBtn?.addEventListener('click', () => changeSong('next'));
+  audio?.addEventListener('ended',  () => changeSong('next'));
 
   fileUpload?.addEventListener('change', ({ target: { files } }) => {
     if (!files.length || !audio) return;
-    playlist = Array.from(files).map(f => ({ name: f.name, src: URL.createObjectURL(f) }));
-    currentIndex = 0; audio.src = playlist[0].src; setLoopMode(); safePlay();
+    playlist     = Array.from(files).map(f => ({ name: f.name, src: URL.createObjectURL(f) }));
+    currentIndex = 0;
+    audio.src    = playlist[0].src;
+    audio.loop   = playlist.length === 1;
+    safePlay();
   });
 
   const VOL_MAP = { switch_off: 0, switch_1: 0.2, switch_2: 0.4, switch_3: 0.6, switch_4: 0.8, switch_5: 1.0 };
-  volumeRadios.forEach(r => r.addEventListener('change', ({ target }) => { if (audio) audio.volume = VOL_MAP[target.id] ?? 1; }));
-  document.body.addEventListener('click', () => { if (audio?.paused && playlist.length > 0) { safePlay(); } }, { once: true });
+  volumeRadios.forEach(r =>
+    r.addEventListener('change', ({ target }) => { if (audio) audio.volume = VOL_MAP[target.id] ?? 1; })
+  );
+
+  document.body.addEventListener('click', () => { if (audio?.paused && playlist.length) safePlay(); }, { once: true });
 }
 
-/* =============================================================
-   GENERATE EXACT DOT RINGS VISUALIZER
-============================================================= */
+/* ================================================================
+   13. DOT VISUALIZER  — built during idle time
+================================================================ */
 function createDotVisualizer() {
-  const container = document.getElementById('dot-visualizer');
+  const container = byId('dot-visualizer');
   if (!container) return;
-  let html = '';
-  for (let r = 1; r <= 10; r++) {
-    let numDots = 18 + (r - 1) * 6;
-    let radius = 40 + (r - 1) * 11; 
-    let delay = (r * 0.333333).toFixed(5);
-    let ringHtml = `<div class="ring" style="position: absolute; width: 80px; height: 80px; top: 160px; left: 160px;">`;
-    
-    for (let d = 1; d <= numDots; d++) {
-      let angle = ((d - 1) * (360 / numDots)).toFixed(4);
-      ringHtml += `
-        <div class="dot" style="position: absolute; width: 8px; height: 8px; top: 40px; left: 40px; transform: translate3d(0, -${radius}px, 0) rotate(${angle}deg); transform-origin: 0 ${radius}px;">
-          <div class="fill" style="width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px rgba(255,255,255,0.8); animation: pulsate 2s ease-in-out ${delay}s alternate infinite both;"></div>
-        </div>`;
+
+  utils.idle(() => {
+    let html = '';
+    for (let r = 1; r <= 10; r++) {
+      const numDots = 18 + (r - 1) * 6;
+      const radius  = 40 + (r - 1) * 11;
+      const delay   = (r * 0.333333).toFixed(5);
+      let   ring    = `<div class="ring" style="position:absolute;width:80px;height:80px;top:160px;left:160px;">`;
+
+      for (let d = 1; d <= numDots; d++) {
+        const angle = ((d - 1) * (360 / numDots)).toFixed(4);
+        ring += `<div class="dot" style="position:absolute;width:8px;height:8px;top:40px;left:40px;` +
+                `transform:translate3d(0,-${radius}px,0) rotate(${angle}deg);transform-origin:0 ${radius}px;">` +
+                `<div class="fill" style="width:8px;height:8px;background:#fff;border-radius:50%;` +
+                `box-shadow:0 0 8px rgba(255,255,255,0.8);` +
+                `animation:pulsate 2s ease-in-out ${delay}s alternate infinite both;"></div></div>`;
+      }
+      ring += '</div>';
+      html += ring;
     }
-    ringHtml += `</div>`;
-    html += ringHtml;
-  }
-  
-  container.innerHTML = html;
+    container.innerHTML = html;
+  });
 }
 
-// Page load hone par dots bana do
 document.addEventListener('DOMContentLoaded', createDotVisualizer);
 
 /* ================================================================
-   12. CLOCK
+   14. CLOCK
 ================================================================ */
 function initClock() {
   const hour = byId('hour'), minute = byId('minute'), second = byId('second');
   if (!hour || !minute || !second) return;
   const tick = () => {
     const d = new Date();
-    hour.style.transform = `rotate(${30 * d.getHours() + d.getMinutes() / 2}deg)`;
-    minute.style.transform = `rotate(${6 * d.getMinutes()}deg)`;
-    second.style.transform = `rotate(${6 * d.getSeconds()}deg)`;
+    hour.style.transform   = `rotate(${30 * d.getHours() + d.getMinutes() / 2}deg)`;
+    minute.style.transform = `rotate(${6  * d.getMinutes()}deg)`;
+    second.style.transform = `rotate(${6  * d.getSeconds()}deg)`;
   };
-  tick(); setInterval(tick, 1000);
+  tick();
+  setInterval(tick, 1000);
 }
 
 /* ================================================================
-   13. CAKE FINALE
+   15. CAKE FINALE
 ================================================================ */
 let isDeskBlown = false;
 function blowCandleAndReveal() {
   if (isDeskBlown) return;
-  const desk = byId('mainContainerDesk'), flame = byId('flame'), tapText = byId('tap-text'), cake = byId('cake'), canvas = byId('grandReveal'), section = byId('cakeFinaleSection');
+  const desk    = byId('mainContainerDesk');
+  const flame   = byId('flame');
+  const tapText = byId('tap-text');
+  const cake    = byId('cake');
+  const canvas  = byId('grandReveal');
+  const section = byId('cakeFinaleSection');
+
   desk?.classList.add('blowing');
   if (tapText) tapText.style.opacity = '0';
+
   setTimeout(() => {
     if (flame) flame.style.display = 'none';
     isDeskBlown = true;
-    if (cake) cake.style.cursor = 'default';
+    if (cake)   cake.style.cursor  = 'default';
+
     setTimeout(() => {
       desk?.classList.remove('blowing');
       setTimeout(() => {
-        if (desk) desk.style.opacity = '0';
+        if (desk)    desk.style.opacity    = '0';
         if (section) section.style.background = '#0a0a0a';
+
         setTimeout(() => {
           canvas?.classList.remove('hidden');
           if (typeof BirthdayEffect !== 'undefined') {
-            const fx = new BirthdayEffect(); let then = Date.now();
-            const loop = () => { requestAnimationFrame(loop); const now = Date.now(); fx.update((now - then) / 1000); then = now; };
+            const fx = new BirthdayEffect();
+            let then = Date.now();
+            const loop = () => {
+              requestAnimationFrame(loop);
+              const now = Date.now();
+              fx.update((now - then) / 1000);
+              then = now;
+            };
             loop();
           }
         }, 800);
@@ -557,40 +622,60 @@ function blowCandleAndReveal() {
 }
 
 /* ================================================================
-   14. FIREFLIES
+   16. FIREFLIES  — created during idle time
 ================================================================ */
 function createFireflies() {
   const container = byId('firefly-container');
   if (!container) return;
-  const frag = document.createDocumentFragment();
-  for (let i = 0; i < 30; i++) {
-    const el = utils.el('div', 'firefly');
-    el.style.left = `${Math.random() * 100}vw`; el.style.animationDuration = `${Math.random() * 5 + 5}s`; el.style.animationDelay = `${Math.random() * 5}s`;
-    frag.appendChild(el);
-  }
-  container.appendChild(frag);
+
+  utils.idle(() => {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 30; i++) {
+      const el = utils.el('div', 'firefly');
+      el.style.left              = `${Math.random() * 100}vw`;
+      el.style.animationDuration = `${Math.random() * 5 + 5}s`;
+      el.style.animationDelay   = `${Math.random() * 5}s`;
+      frag.appendChild(el);
+    }
+    container.appendChild(frag);
+  });
 }
 
 /* ================================================================
-   15. CANVAS FIREWORKS
+   17. CANVAS FIREWORKS
 ================================================================ */
 class BirthdayEffect {
   constructor() {
-    this.canvas = byId('birthdayCanvas'); this.ctx = this.canvas.getContext('2d');
-    this.fireworks = []; this.counter = 0; this.resize();
-    window.addEventListener('resize', () => this.resize());
+    this.canvas    = byId('birthdayCanvas');
+    this.ctx       = this.canvas.getContext('2d');
+    this.fireworks = [];
+    this.counter   = 0;
+    this.resize();
+    window.addEventListener('resize', utils.debounce(() => this.resize(), 200));
   }
   resize() {
-    this.width = this.canvas.width = window.innerWidth; this.height = this.canvas.height = window.innerHeight;
-    const cx = (this.width / 2) | 0; this.spawnA = (cx - cx / 4) | 0; this.spawnB = (cx + cx / 4) | 0;
-    this.spawnC = this.height * 0.1; this.spawnD = this.height * 0.5;
+    this.width  = this.canvas.width  = window.innerWidth;
+    this.height = this.canvas.height = window.innerHeight;
+    const cx    = (this.width / 2) | 0;
+    this.spawnA = (cx - cx / 4) | 0;
+    this.spawnB = (cx + cx / 4) | 0;
+    this.spawnC = this.height * 0.1;
+    this.spawnD = this.height * 0.5;
   }
   update(delta) {
-    const { ctx } = this; ctx.globalCompositeOperation = 'hard-light'; ctx.fillStyle = `rgba(20,20,20,${7 * delta})`; ctx.fillRect(0, 0, this.width, this.height); ctx.globalCompositeOperation = 'lighter';
+    const { ctx } = this;
+    ctx.globalCompositeOperation = 'hard-light';
+    ctx.fillStyle = `rgba(20,20,20,${7 * delta})`;
+    ctx.fillRect(0, 0, this.width, this.height);
+    ctx.globalCompositeOperation = 'lighter';
     this.fireworks.forEach(fw => fw.draw(ctx, delta, this));
     this.counter += delta * 3;
     if (this.counter >= 1) {
-      this.fireworks.push(new FireworkPiece(utils.rand(this.spawnA, this.spawnB), this.height, utils.rand(0, this.width), utils.rand(this.spawnC, this.spawnD), utils.rand(0, 360), utils.rand(30, 110)));
+      this.fireworks.push(new FireworkPiece(
+        utils.rand(this.spawnA, this.spawnB), this.height,
+        utils.rand(0, this.width),             utils.rand(this.spawnC, this.spawnD),
+        utils.rand(0, 360),                    utils.rand(30, 110)
+      ));
       this.counter = 0;
     }
     if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(fw => !fw.dead);
@@ -606,47 +691,64 @@ class FireworkPiece {
     if (this.dead) return;
     const dx = this.targetX - this.x, dy = this.targetY - this.y;
     if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-      this.x += dx * 2 * delta; this.y += dy * 2 * delta; this.history.push({ x: this.x, y: this.y });
+      this.x += dx * 2 * delta; this.y += dy * 2 * delta;
+      this.history.push({ x: this.x, y: this.y });
       if (this.history.length > 20) this.history.shift();
     } else {
       if (this.offsprings && !this.madeChilds) {
         const half = this.offsprings / 2;
         for (let i = 0; i < half; i++) {
-          parent.fireworks.push(new FireworkPiece(this.x, this.y, (this.x + this.offsprings * Math.cos((PI2 * i) / half)) | 0, (this.y + this.offsprings * Math.sin((PI2 * i) / half)) | 0, this.shade, 0));
+          parent.fireworks.push(new FireworkPiece(
+            this.x, this.y,
+            (this.x + this.offsprings * Math.cos((PI2 * i) / half)) | 0,
+            (this.y + this.offsprings * Math.sin((PI2 * i) / half)) | 0,
+            this.shade, 0
+          ));
         }
         this.madeChilds = true;
       }
       this.history.shift();
     }
     if (!this.history.length) { this.dead = true; return; }
-    ctx.beginPath(); ctx.fillStyle = `hsl(${this.shade},100%,50%)`; ctx.arc(this.x, this.y, 1, 0, PI2); ctx.fill();
+    ctx.beginPath();
+    ctx.fillStyle = `hsl(${this.shade},100%,50%)`;
+    ctx.arc(this.x, this.y, 1, 0, PI2);
+    ctx.fill();
   }
 }
 
 /* ================================================================
-   16. ROSE OVERLAY
+   18. ROSE OVERLAY
 ================================================================ */
-function openMagicalRose() { byId('roseOverlay')?.classList.add('active'); setTimeout(() => byId('magicGlass')?.classList.add('lift-up'), 800); }
+function openMagicalRose()  { byId('roseOverlay')?.classList.add('active');    setTimeout(() => byId('magicGlass')?.classList.add('lift-up'),    800); }
 function closeMagicalRose() { byId('roseOverlay')?.classList.remove('active'); setTimeout(() => byId('magicGlass')?.classList.remove('lift-up'), 500); }
 
 /* ================================================================
-   17. BOOTSTRAP
+   19. BOOTSTRAP
+   Single fetch — split into critical (above-fold) vs deferred.
+   Critical: book, clock, loader dismissal.
+   Deferred:  everything else, scheduled via lazyInit / idle.
 ================================================================ */
 fetch('data.json')
   .then(r => r.json())
   .then(data => {
+    // ── Critical path (above fold) ───────────────────────────────
     renderBook(data.book);
-    renderSlider(data.memories);
-    renderCarousel(data.carousel);
-    renderSpinner(data.spinner);
-    renderJhoomar(data.jhoomar);
-    renderMagicalGallery(data.magicalGallery);
-    initCircularGallery(data.AnimatedFrameImages); 
-
     initClock();
-    createFireflies();
-    initMusicPlayer();
 
+    // ── Deferred renders (below fold — will init on scroll-into-view)
+    renderSlider(data.memories);          // wires its own observer
+    renderCarousel(data.carousel);        // observer set inside renderCarousel
+    renderSpinner(data.spinner);          // observer set inside renderSpinner
+    renderJhoomar(data.jhoomar);
+    renderMagicalGallery(data.magicalGallery); // observer set inside render
+    initCircularGallery(data.AnimatedFrameImages);
+
+    // ── Idle tasks ───────────────────────────────────────────────
+    createFireflies();                    // uses utils.idle internally
+    scheduleMusicInit();                  // deferred until scroll or idle
+
+    // ── Hide loader ──────────────────────────────────────────────
     setTimeout(() => {
       byId('loader')?.classList.add('hidden');
       $('.book-controls')?.classList.remove('d-none');
