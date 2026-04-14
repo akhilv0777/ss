@@ -70,7 +70,8 @@
   </div>
 
   <div class="section-full" id="music-player-section">
-    <div id="saumya-popup">
+    <div id="music-popup">
+      <div id="dot-visualizer"></div>
       <img src="" alt="Image">
     </div>
     <div class="main flex" id="mp-h">
@@ -240,7 +241,6 @@
         </div>
       </div>
     </div>
-
     <div class="custom-controls">
       <label for="mp-file-upload" class="custom-file-upload" title="Upload Songs">
         <i class="fas fa-upload"></i>
@@ -290,15 +290,17 @@
   </div>
 
   <div class="section-full" id="frameSection">
-    <div class="frame" id="dynamicFrame">
-
-      <div class="frame-inner">
-        <div class="frame-bg" id="frameBg"></div>
+    <section class="circular-wrapper" id="gallery-wrapper">
+      <div class="center-frame-container">
+        <div class="frame" id="dynamicFrame">
+          <div class="frame-inner">
+            <div class="frame-bg" id="frameBg"></div>
+          </div>
+          <div class="text" id="dynamicTextContainer"></div>
+        </div>
       </div>
 
-      <div class="text" id="dynamicTextContainer"></div>
-
-    </div>
+    </section>
   </div>
   <div class="section-full" id="cakeFinaleSection">
     <div class="container-desk" id="mainContainerDesk">
