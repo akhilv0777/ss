@@ -107,17 +107,17 @@
     { "title": "Gorgeous", "imgUrl": "./assets/ss (10).jpg" },
     { "title": "Lovely", "imgUrl": "./assets/ss (11).jpg" },
     { "title": "Charming", "imgUrl": "./assets/ss (12).jpg" },
-    { "title": "Beautiful", "imgUrl": "./assets/ss (13).jpg" },
-    { "title": "Cute", "imgUrl": "./assets/ss (14).jpg" },
-    { "title": "Smile", "imgUrl": "./assets/ss (15).jpg" },
-    { "title": "Happy", "imgUrl": "./assets/ss (16).jpg" },
-    { "title": "Joy", "imgUrl": "./assets/ss (17).jpg" },
-    { "title": "Elegant", "imgUrl": "./assets/ss (18).jpg" },
-    { "title": "Sweet", "imgUrl": "./assets/ss (19).jpg" },
-    { "title": "Pretty", "imgUrl": "./assets/ss (20).jpg" },
-    { "title": "Radiant", "imgUrl": "./assets/ss (21).jpg" },
-    { "title": "Gorgeous", "imgUrl": "./assets/ss (22).jpg" },
-    { "title": "Lovely", "imgUrl": "./assets/ss (23).jpg" },
-    { "title": "Charming", "imgUrl": "./assets/ss (24).jpg" }
-  ]
+    { "title": "Graceful", "imgUrl": "./assets/ss (13).jpg" },
+    { "title": "Stunning", "imgUrl": "./assets/ss (14).jpg" },
+    { "title": "Cheerful", "imgUrl": "./assets/ss (15).jpg" },
+    { "title": "Bright", "6imgUrl": "./assets/ss (16).jpg" },
+    { "title": "Delightful", "imgUrl": "./assets/ss (17).jpg" },
+    { "title": "Classy", "imgUrl": "./assets/ss (18).jpg" },
+    { "title": "Adorable", "imgUrl": "./assets/ss (19).jpg" },
+    { "title": "Splendid", "imgUrl": "./assets/ss (20).jpg" },
+    { "title": "Glow", "imgUrl": "./assets/ss (21).jpg" },
+    { "title": "Vibrant", "imgUrl": "./assets/ss (22).jpg" },
+    { "title": "Angelic", "imgUrl": "./assets/ss (23).jpg" },
+    { "title": "Captivating", "imgUrl": "./assets/ss (24).jpg" }
+ ]
 }
