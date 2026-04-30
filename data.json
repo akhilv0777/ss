@@ -1,123 +1,206 @@
 {
-   "book": [
-     { "id": "p1", "zIndex": 4, "isCover": true, "backContent": { "title": "To My Bestie Saumya,", "text": "A special chapter in the beautiful book of your life...", "symbol": "💎" }, "frontContent": { "coverImg": "./assets/ss (1).jpg", "title": "The Golden Days of Saumya", "chapter": "Chapter 2026", "footer": "Keep Moving Forward" } },
-     { "id": "p2", "zIndex": 3, "backContent": { "img": "./assets/ss (2).jpg", "text": "\"A heart of gold\" 💛" }, "frontContent": { "img": "./assets/ss (3).jpg", "text": "\"A gathering of memories\" 🎞️" } },
-     { "id": "p3", "zIndex": 2, "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Courage and tenderness\" 💪" }, "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Big dreams\" 🚀" } },
-     { "id": "p4", "zIndex": 1, "backContent": { "title": "Always Stay Awesome", "text": "The world is incomplete without a friend like you!" }, "frontContent": { "img": "./assets/ss (6).jpg", "text": "\"That iconic vibe\" ✨" } }
-   ],
-   "memories": [
-     { "img": "./assets/ss (7).jpg", "title": "Amazing Friend...", "desc": "I was thinking about our funny moments today and couldn't help but laugh. Your presence always lightens the mood." },
-     { "img": "./assets/ss (8).jpg", "title": "Best Therapist ✨", "desc": "Whenever I talk to you and we start our random gossips, all my worries just disappear. ✨" },
-     { "img": "./assets/ss (9).jpg", "title": "Growing Together", "desc": "Like our awesome bond, you just keep getting wiser and more fun with every passing day. 😍" },
-     { "img": "./assets/ss (10).jpg", "title": "Endless Drama", "desc": "I am always ready for our endless gossips, random discussions, and daily drama! 🌟" },
-     { "img": "./assets/ss (11).jpg", "title": "Crazy Times", "desc": "Every time I look at our crazy pictures together, I just can't stop smiling at our stupidity." },
-     { "img": "./assets/ss (12).jpg", "title": "Your Positivity..", "desc": "Your positive energy and bright smile always bring good vibes." },
-     { "img": "./assets/ss (13).jpg", "title": "Kind Soul..", "desc": "You have a genuinely kind heart and always support your friends." },
-     { "img": "./assets/ss (14).jpg", "title": "Fun Moments..", "desc": "Every single moment spent with our group becomes a hilarious memory." },
-     { "img": "./assets/ss (15).jpg", "title": "Endless Laughter..", "desc": "Having a best friend like you around brings endless joy and laughter." },
-     { "img": "./assets/ss (16).jpg", "title": "Forever Besties..", "desc": "Always stay this crazy and keep shining bright." }
-   ],
-   "carousel": [
-     { "title": "Hi 👋", "num": "01", "img": "./assets/ss (17).jpg" },
-     { "title": "I want to tell you Something 😎", "num": "02", "img": "./assets/ss (18).jpg" },
-     { "title": "Please Keep Dragging 😊", "num": "03", "img": "./assets/ss (19).jpg" },
-     { "title": "You are an Amazing Friend 🤩", "num": "04", "img": "./assets/ss (20).jpg" },
-     { "title": "Always so Supportive 💯", "num": "05", "img": "./assets/ss (21).jpg" },
-     { "title": "And Super Fun! 🎉", "num": "06", "img": "./assets/ss (22).jpg" },
-     { "title": "Honestly speaking... 😇", "num": "07", "img": "./assets/ss (23).jpg" },
-     { "title": "Always by my side 🤝", "num": "08", "img": "./assets/ss (24).jpg" },
-     { "title": "And my favorite headache! 😂", "num": "09", "img": "./assets/ss (25).jpg" },
-     { "title": "Happy Birthday, Yaar! 🎂", "num": "10", "img": "./assets/ss (26).jpg" }
-   ],
-   "spinner": [
-     { "img": "./assets/ss (27).jpg" },
-     { "img": "./assets/ss (28).jpg" },
-     { "img": "./assets/ss (29).jpg" },
-     { "img": "./assets/ss (30).jpg" },
-     { "img": "./assets/ss (31).jpg" },
-     { "img": "./assets/ss (32).jpg" },
-     { "img": "./assets/ss (33).jpg" },
-     { "img": "./assets/ss (34).jpg" },
-     { "img": "./assets/ss (35).jpg" },
-     { "img": "./assets/ss (36).jpg" }
-   ],
-   "jhoomar": [
-     { "img": "./assets/ss (37).jpg" },
-     { "img": "./assets/ss (38).jpg" },
-     { "img": "./assets/ss (39).jpg" },
-     { "img": "./assets/ss (40).jpg" },
-     { "img": "./assets/ss (41).jpg" },
-     { "img": "./assets/ss (42).jpg" },
-     { "img": "./assets/ss (43).jpg" },
-     { "img": "./assets/ss (44).jpg" },
-     { "img": "./assets/ss (45).jpg" },
-     { "img": "./assets/ss (46).jpg" }
-   ],
-    "saumyaImages": [
-      "./assets/ss (12).jpg",
-      "./assets/ss (13).jpg",
-      "./assets/ss (17).jpg",
-      "./assets/ss (19).jpg"
+  "site": {
+    "title": "Happy Birthday Saumya 💕",
+    "favicon": "./assets/ss (46).jpg",
+    "bgVideo": "./assets/ss (2).mp4",
+    "theme": "moonlit-gold"
+  },
+  "loader": {
+    "waitText": "Please Wait",
+    "hint": "Crafting a magical experience just for you... ✨"
+  },
+  "welcomeToast": {
+    "title": "A little surprise awaits you 🎉",
+    "subtitle": "Scroll gently to explore each magical section."
+  },
+  "hero": {
+    "greeting": "Hello Beautiful ✨",
+    "name": "Saumya",
+    "nickname": "Somu",
+    "tagline": "Today Is Your Day 🎂",
+    "subtitle": "A magical journey crafted with love, just for you",
+    "ctaText": "Begin the Magic",
+    "scrollHint": "Scroll down to begin your surprise ↓"
+  },
+  "stats": [
+    { "icon": "🌸", "value": 2,   "suffix": "+",  "label": "Years of Beautiful Friendship" },
+    { "icon": "📸", "value": 73,  "suffix": "",    "label": "Precious Photos Together" },
+    { "icon": "🎵", "value": 3,   "suffix": "",    "label": "Songs That Remind Me of You" },
+    { "icon": "💛", "value": 999, "suffix": "+",   "label": "Reasons I'm Glad You Exist" }
+  ],
+  "sectionTitles": {
+    "stats":     { "heading": "Our Story in Numbers 💛",       "sub": "Every number here has a story behind it" },
+    "polaroid":  { "heading": "More Moments 📸",               "sub": "Swipe through our little gallery of memories" },
+    "filmReel":  { "heading": "Reels of Us 🎞️",               "sub": "Every frame is a story worth keeping forever" },
+    "timeline":  { "heading": "Our Journey Together 🌟",       "sub": "Moments that made us, us" },
+    "qualities": { "heading": "What Makes You, You ✨",         "sub": "Just a few of the million reasons you're wonderful" },
+    "wishJar":   { "heading": "A Jar Full of Wishes 🫙",        "sub": "Every wish bottled just for you — tap the jar to release them!", "tapHint": "✨Tap to release a wish✨", "jarLabel": ["Birthday", "Wishes"] }
+  },
+  "spinLabel": "From Developer Akhil 💕",
+  "frameText": "HAPPY BIRTHDAY SAUMYA",
+  "roseText": "Just like this magical rose, may your smile bloom forever... 🌹✨",
+  "grandReveal": {
+    "line1": "Happy Birthday",
+    "line2": "Somu!",
+    "tapHint": "Tap the cake"
+  },
+  "qualities": [
+    { "icon": "fa-heart",        "title": "Kind Soul",         "desc": "Always the first to care, never the last to show it.", "color": "#ff7eb3" },
+    { "icon": "fa-star",         "title": "Radiant",           "desc": "You light up every single room you walk into.", "color": "#f5c842" },
+    { "icon": "fa-face-laugh",   "title": "Infectious Laugh",  "desc": "One laugh from you and the whole world smiles.", "color": "#7ad7ff" },
+    { "icon": "fa-shield-heart", "title": "Loyal Friend",      "desc": "When everyone leaves, you stay. That says everything.", "color": "#b388ff" },
+    { "icon": "fa-bolt",         "title": "Unstoppable",       "desc": "Challenges don't stop you, they only make you stronger.", "color": "#55efc4" },
+    { "icon": "fa-gem",          "title": "One of a Kind",     "desc": "There is truly nobody else quite like you in this world.", "color": "#fdcb6e" }
+  ],
+  "filmReel": [
+    "./assets/ss (57).jpg", "./assets/ss (58).jpg", "./assets/ss (59).jpg",
+    "./assets/ss (60).jpg", "./assets/ss (61).jpg", "./assets/ss (62).jpg",
+    "./assets/ss (63).jpg", "./assets/ss (64).jpg", "./assets/ss (65).jpg",
+    "./assets/ss (66).jpg", "./assets/ss (67).jpg", "./assets/ss (68).jpg",
+    "./assets/ss (69).jpg", "./assets/ss (70).jpg", "./assets/ss (71).jpg"
+  ],
+  "book": [
+    { "id": "p1", "zIndex": 4, "isCover": true, "backContent": { "title": "To My Bestie Saumya,", "text": "A special chapter in the beautiful book of your life...", "symbol": "💎" }, "frontContent": { "coverImg": "./assets/ss (1).jpg", "title": "The Golden Days of Saumya", "chapter": "Chapter 2026", "footer": "Keep Moving Forward" } },
+    { "id": "p2", "zIndex": 3, "backContent": { "img": "./assets/ss (2).jpg", "text": "\"A heart of gold\" 💛" }, "frontContent": { "img": "./assets/ss (3).jpg", "text": "\"A gathering of memories\" 🎞️" } },
+    { "id": "p3", "zIndex": 2, "backContent": { "img": "./assets/ss (4).jpg", "text": "\"Courage and tenderness\" 💪" }, "frontContent": { "img": "./assets/ss (5).jpg", "text": "\"Big dreams\" 🚀" } },
+    { "id": "p4", "zIndex": 1, "backContent": { "title": "Always Stay Awesome", "text": "The world is incomplete without a friend like you!" }, "frontContent": { "img": "./assets/ss (6).jpg", "text": "\"That iconic vibe\" ✨" } }
+  ],
+  "memories": [
+    { "img": "./assets/ss (7).jpg",  "title": "Amazing Friend...",    "desc": "I was thinking about our funny moments today and couldn't help but laugh. Your presence always lightens the mood." },
+    { "img": "./assets/ss (8).jpg",  "title": "Best Therapist ✨",     "desc": "Whenever I talk to you and we start our random gossips, all my worries just disappear. ✨" },
+    { "img": "./assets/ss (9).jpg",  "title": "Growing Together",     "desc": "Like our awesome bond, you just keep getting wiser and more fun with every passing day. 😍" },
+    { "img": "./assets/ss (10).jpg", "title": "Endless Drama",        "desc": "I am always ready for our endless gossips, random discussions, and daily drama! 🌟" },
+    { "img": "./assets/ss (11).jpg", "title": "Crazy Times",          "desc": "Every time I look at our crazy pictures together, I just can't stop smiling at our stupidity." },
+    { "img": "./assets/ss (12).jpg", "title": "Your Positivity..",    "desc": "Your positive energy and bright smile always bring good vibes." },
+    { "img": "./assets/ss (13).jpg", "title": "Kind Soul..",          "desc": "You have a genuinely kind heart and always support your friends." },
+    { "img": "./assets/ss (14).jpg", "title": "Fun Moments..",        "desc": "Every single moment spent with our group becomes a hilarious memory." },
+    { "img": "./assets/ss (15).jpg", "title": "Endless Laughter..",   "desc": "Having a best friend like you around brings endless joy and laughter." },
+    { "img": "./assets/ss (16).jpg", "title": "Forever Besties..",    "desc": "Always stay this crazy and keep shining bright." }
+  ],
+  "carousel": [
+    { "title": "Hi 👋",                            "num": "01", "img": "./assets/ss (17).jpg" },
+    { "title": "I want to tell you Something 😎",  "num": "02", "img": "./assets/ss (18).jpg" },
+    { "title": "Please Keep Dragging 😊",          "num": "03", "img": "./assets/ss (19).jpg" },
+    { "title": "You are an Amazing Friend 🤩",     "num": "04", "img": "./assets/ss (20).jpg" },
+    { "title": "Always so Supportive 💯",          "num": "05", "img": "./assets/ss (21).jpg" },
+    { "title": "And Super Fun! 🎉",                "num": "06", "img": "./assets/ss (22).jpg" },
+    { "title": "Honestly speaking... 😇",          "num": "07", "img": "./assets/ss (23).jpg" },
+    { "title": "Always by my side 🤝",             "num": "08", "img": "./assets/ss (24).jpg" },
+    { "title": "And my favorite headache! 😂",     "num": "09", "img": "./assets/ss (25).jpg" },
+    { "title": "Happy Birthday, Yaar! 🎂",         "num": "10", "img": "./assets/ss (26).jpg" }
+  ],
+  "spinner": [
+    { "img": "./assets/ss (27).jpg" }, { "img": "./assets/ss (28).jpg" },
+    { "img": "./assets/ss (29).jpg" }, { "img": "./assets/ss (30).jpg" },
+    { "img": "./assets/ss (31).jpg" }, { "img": "./assets/ss (32).jpg" },
+    { "img": "./assets/ss (33).jpg" }, { "img": "./assets/ss (34).jpg" },
+    { "img": "./assets/ss (35).jpg" }, { "img": "./assets/ss (36).jpg" }
+  ],
+  "jhoomar": [
+    { "img": "./assets/ss (37).jpg" }, { "img": "./assets/ss (38).jpg" },
+    { "img": "./assets/ss (39).jpg" }, { "img": "./assets/ss (40).jpg" },
+    { "img": "./assets/ss (41).jpg" }, { "img": "./assets/ss (42).jpg" },
+    { "img": "./assets/ss (43).jpg" }, { "img": "./assets/ss (44).jpg" },
+    { "img": "./assets/ss (45).jpg" }, { "img": "./assets/ss (46).jpg" }
+  ],
+  "timeline": [
+    { "label": "The Beginning ✨", "title": "First Hello",       "desc": "The moment we met and clicked instantly — I knew this friendship was meant to be.", "img": "./assets/ss (7).jpg",  "color": "#ff7eb3" },
+    { "label": "Random Laughs 😂", "title": "Crazy Times",      "desc": "All our unplanned adventures, random gossips, and inside jokes that no one else gets.", "img": "./assets/ss (8).jpg",  "color": "#f5c842" },
+    { "label": "Growing Together 🌱","title": "Side by Side",   "desc": "Through every up and down, you were always right there — cheering me on without fail.", "img": "./assets/ss (9).jpg",  "color": "#7ad7ff" },
+    { "label": "Drama & More 🎭",  "title": "Endless Stories",  "desc": "Our lives basically became a series of plots nobody would believe without proof.", "img": "./assets/ss (10).jpg", "color": "#b388ff" },
+    { "label": "Real Support 🤝",  "title": "My Rock",          "desc": "On the hardest days, a message from you was enough to make everything feel okay.", "img": "./assets/ss (11).jpg", "color": "#55efc4" },
+    { "label": "Golden Memories 💛","title": "Unforgettable",   "desc": "Every photo, every moment, every laugh together — pure gold I will treasure forever.", "img": "./assets/ss (12).jpg", "color": "#fdcb6e" }
+  ],
+  "wishJar": [
+    { "wish": "May all your dreams take flight and soar higher than the stars! 🌙",          "color": "#ff7eb3" },
+    { "wish": "Wishing you a year full of beautiful surprises and pure happiness! 🌟",       "color": "#f5c842" },
+    { "wish": "May your smile never fade and your heart always stay light! 😊",              "color": "#7ad7ff" },
+    { "wish": "Success, love, and joy — may all three find you in abundance! 💛",            "color": "#b388ff" },
+    { "wish": "May this birthday mark the beginning of your most magical chapter yet! ✨",   "color": "#55efc4" },
+    { "wish": "You deserve every good thing the universe has to offer, Saumya! 🌸",         "color": "#ff9ab5" },
+    { "wish": "Stay exactly as wonderful as you are — the world needs your spark! 💫",      "color": "#fdcb6e" },
+    { "wish": "Here's to new adventures, new memories, and endless reasons to smile! 🎉",   "color": "#ff7eb3" }
+  ],
+  "letter": {
+    "sectionTitle": "A Letter For You 💌",
+    "openHint": "Tap to open 💌",
+    "greeting": "Dear Saumya,",
+    "lines": [
+      "I sit here trying to find the perfect words, and honestly — there aren't any that feel big enough.",
+      "You came into my life and just made everything brighter, louder, funnier, and so much more meaningful.",
+      "Through every random 2 AM conversation, every exam panic, every silly fight and every burst of laughter —",
+      "you have been the kind of friend people write songs about.",
+      "On this special day, I want you to know: you are seen, you are valued, and you are loved more than you'll ever realise.",
+      "Keep shining, keep being your wonderfully chaotic self, and never stop smiling that smile that makes the whole room warm.",
+      "The world is genuinely a better place because you are in it. 🌸"
     ],
-    "musicList": [
-      { "name": "Cute Background Music 3", "src": "./assets/music3.mp3" },
-      { "name": "Somu Special Song 1", "src": "./assets/music.mp3" },
-      { "name": "Cute Background Music", "src": "./assets/music2.mp3" }
-    ],
-    "magicalGallery": [
-     { "id": "vid_1", "type": "video", "src": "./assets/ss (1).mp4", "frontNote": "Our Funniest Moment 🎥", "backNote": "This hilarious moment will always be cherished! 😂", "isMain": true },
-     { "id": "pic_1", "type": "image", "src": "./assets/ss (47).jpg", "frontNote": "Above the Clouds ☁️", "backNote": "Wishing you always reach for the sky and achieve your goals!" },
-     { "id": "pic_2", "type": "image", "src": "./assets/ss (48).jpg", "frontNote": "Best Vibe 💯", "backNote": "Your positive energy is unmatched. Nazar na lage! 🧿" },
-     { "id": "pic_3", "type": "image", "src": "./assets/ss (49).jpg", "frontNote": "That Sweet Smile 😊", "backNote": "Your cheerful nature brightens everyone's day around you." },
-     { "id": "pic_4", "type": "image", "src": "./assets/ss (50).jpg", "frontNote": "Crazy Memories ✨", "backNote": "Some hilarious moments that we will never forget." },
-     { "id": "pic_5", "type": "image", "src": "./assets/ss (51).jpg", "frontNote": "Stay Protected 🧿", "backNote": "Always be safe and keep progressing in life." },
-     { "id": "pic_6", "type": "image", "src": "./assets/ss (52).jpg", "frontNote": "Great Friends 🤝", "backNote": "May our friendly banters and gossips never end." },
-     { "id": "pic_7", "type": "image", "src": "./assets/ss (53).jpg", "frontNote": "Happiness 🌟", "backNote": "May you get all the success you deserve." },
-     { "id": "pic_8", "type": "image", "src": "./assets/ss (54).jpg", "frontNote": "Golden Times 🕰️", "backNote": "School/College days are always the most precious." },
-     { "id": "pic_9", "type": "image", "src": "./assets/ss (55).jpg", "frontNote": "Perfect Clicks 📸", "backNote": "A picture perfect moment with the gang!" },
-     { "id": "pic_10", "type": "image", "src": "./assets/ss (56).jpg", "frontNote": "My Bestie ✌️", "backNote": "A true friend for life! Always got your back." }
-   ],
-   "carouselCards": [
-     { "num": "01", "title": "Hi 👋", "img": "./assets/ss (57).jpg" },
-     { "num": "02", "title": "I want to tell you Something 😎", "img": "./assets/ss (58).jpg" },
-     { "num": "03", "title": "Please Keep Dragging 😊", "img": "./assets/ss (59).jpg" },
-     { "num": "04", "title": "You are an Amazing Friend 🤩", "img": "./assets/ss (60).jpg" },
-     { "num": "05", "title": "Always so Supportive 💯", "img": "./assets/ss (61).jpg" },
-     { "num": "06", "title": "And Super Fun! 🎉", "img": "./assets/ss (62).jpg" },
-     { "num": "07", "title": "Honestly speaking... 😇", "img": "./assets/ss (63).jpg" },
-     { "num": "08", "title": "Always by my side 🤝", "img": "./assets/ss (64).jpg" },
-     { "num": "09", "title": "And my favorite headache! 😂", "img": "./assets/ss (65).jpg" },
-     { "num": "10", "title": "Happy Birthday, Yaar! 🎂", "img": "./assets/ss (66).jpg" },
-     { "num": "11", "title": "Keep Smiling ✨", "img": "./assets/ss (67).jpg" },
-     { "num": "12", "title": "Stay Awesome 🌟", "img": "./assets/ss (68).jpg" },
-     { "num": "13", "title": "You're a True Gem 💎", "img": "./assets/ss (69).jpg" },
-     { "num": "14", "title": "Crazy Memories 📸", "img": "./assets/ss (70).jpg" },
-     { "num": "15", "title": "Have a Blast! 🎉", "img": "./assets/ss (71).jpg" }
-   ],
-   "AnimatedFrameImages": [
-    { "title": "Beautiful", "imgUrl": "./assets/ss (1).jpg" },
-    { "title": "Cute", "imgUrl": "./assets/ss (2).jpg" },
-    { "title": "Smile", "imgUrl": "./assets/ss (3).jpg" },
-    { "title": "Happy", "imgUrl": "./assets/ss (4).jpg" },
-    { "title": "Joy", "imgUrl": "./assets/ss (5).jpg" },
-    { "title": "Elegant", "imgUrl": "./assets/ss (6).jpg" },
-    { "title": "Sweet", "imgUrl": "./assets/ss (7).jpg" },
-    { "title": "Pretty", "imgUrl": "./assets/ss (8).jpg" },
-    { "title": "Radiant", "imgUrl": "./assets/ss (9).jpg" },
-    { "title": "Gorgeous", "imgUrl": "./assets/ss (10).jpg" },
-    { "title": "Lovely", "imgUrl": "./assets/ss (11).jpg" },
-    { "title": "Charming", "imgUrl": "./assets/ss (12).jpg" },
-    { "title": "Graceful", "imgUrl": "./assets/ss (13).jpg" },
-    { "title": "Stunning", "imgUrl": "./assets/ss (14).jpg" },
-    { "title": "Cheerful", "imgUrl": "./assets/ss (15).jpg" },
-    { "title": "Bright", "imgUrl": "./assets/ss (16).jpg" },
-    { "title": "Delightful", "imgUrl": "./assets/ss (17).jpg" },
-    { "title": "Classy", "imgUrl": "./assets/ss (18).jpg" },
-    { "title": "Adorable", "imgUrl": "./assets/ss (19).jpg" },
-    { "title": "Splendid", "imgUrl": "./assets/ss (20).jpg" },
-    { "title": "Glow", "imgUrl": "./assets/ss (21).jpg" },
-    { "title": "Vibrant", "imgUrl": "./assets/ss (22).jpg" },
-    { "title": "Angelic", "imgUrl": "./assets/ss (23).jpg" },
+    "closing": "With all my heart,",
+    "signature": "Your Bestie Forever 💕",
+    "sealEmoji": "💌"
+  },
+  "carouselCards": [
+    { "num": "01", "title": "Hi 👋",                            "img": "./assets/ss (57).jpg" },
+    { "num": "02", "title": "I want to tell you Something 😎",  "img": "./assets/ss (58).jpg" },
+    { "num": "03", "title": "Please Keep Dragging 😊",          "img": "./assets/ss (59).jpg" },
+    { "num": "04", "title": "You are an Amazing Friend 🤩",     "img": "./assets/ss (60).jpg" },
+    { "num": "05", "title": "Always so Supportive 💯",          "img": "./assets/ss (61).jpg" },
+    { "num": "06", "title": "And Super Fun! 🎉",                "img": "./assets/ss (62).jpg" },
+    { "num": "07", "title": "Honestly speaking... 😇",          "img": "./assets/ss (63).jpg" },
+    { "num": "08", "title": "Always by my side 🤝",             "img": "./assets/ss (64).jpg" },
+    { "num": "09", "title": "And my favorite headache! 😂",     "img": "./assets/ss (65).jpg" },
+    { "num": "10", "title": "Happy Birthday, Yaar! 🎂",         "img": "./assets/ss (66).jpg" },
+    { "num": "11", "title": "Keep Smiling ✨",                   "img": "./assets/ss (67).jpg" },
+    { "num": "12", "title": "Stay Awesome 🌟",                  "img": "./assets/ss (68).jpg" },
+    { "num": "13", "title": "You're a True Gem 💎",             "img": "./assets/ss (69).jpg" },
+    { "num": "14", "title": "Crazy Memories 📸",                "img": "./assets/ss (70).jpg" },
+    { "num": "15", "title": "Have a Blast! 🎉",                 "img": "./assets/ss (71).jpg" }
+  ],
+  "saumyaImages": [
+    "./assets/ss (12).jpg", "./assets/ss (13).jpg",
+    "./assets/ss (17).jpg", "./assets/ss (19).jpg"
+  ],
+  "musicList": [
+    { "name": "Cute Background Music 3", "src": "./assets/music3.mp3" },
+    { "name": "Somu Special Song 1",     "src": "./assets/music.mp3"  },
+    { "name": "Cute Background Music",   "src": "./assets/music2.mp3" }
+  ],
+  "magicalGallery": [
+    { "id": "vid_1",  "type": "video", "src": "./assets/ss (1).mp4",  "frontNote": "Our Funniest Moment 🎥",  "backNote": "This hilarious moment will always be cherished! 😂", "isMain": true },
+    { "id": "pic_1",  "type": "image", "src": "./assets/ss (47).jpg", "frontNote": "Above the Clouds ☁️",     "backNote": "Wishing you always reach for the sky and achieve your goals!" },
+    { "id": "pic_2",  "type": "image", "src": "./assets/ss (48).jpg", "frontNote": "Best Vibe 💯",             "backNote": "Your positive energy is unmatched. Nazar na lage! 🧿" },
+    { "id": "pic_3",  "type": "image", "src": "./assets/ss (49).jpg", "frontNote": "That Sweet Smile 😊",      "backNote": "Your cheerful nature brightens everyone's day around you." },
+    { "id": "pic_4",  "type": "image", "src": "./assets/ss (50).jpg", "frontNote": "Crazy Memories ✨",         "backNote": "Some hilarious moments that we will never forget." },
+    { "id": "pic_5",  "type": "image", "src": "./assets/ss (51).jpg", "frontNote": "Stay Protected 🧿",         "backNote": "Always be safe and keep progressing in life." },
+    { "id": "pic_6",  "type": "image", "src": "./assets/ss (52).jpg", "frontNote": "Great Friends 🤝",          "backNote": "May our friendly banters and gossips never end." },
+    { "id": "pic_7",  "type": "image", "src": "./assets/ss (53).jpg", "frontNote": "Happiness 🌟",              "backNote": "May you get all the success you deserve." },
+    { "id": "pic_8",  "type": "image", "src": "./assets/ss (54).jpg", "frontNote": "Golden Times 🕰️",           "backNote": "School/College days are always the most precious." },
+    { "id": "pic_9",  "type": "image", "src": "./assets/ss (55).jpg", "frontNote": "Perfect Clicks 📸",         "backNote": "A picture perfect moment with the gang!" },
+    { "id": "pic_10", "type": "image", "src": "./assets/ss (56).jpg", "frontNote": "My Bestie ✌️",              "backNote": "A true friend for life! Always got your back." }
+  ],
+  "AnimatedFrameImages": [
+    { "title": "Beautiful",   "imgUrl": "./assets/ss (1).jpg"  },
+    { "title": "Cute",        "imgUrl": "./assets/ss (2).jpg"  },
+    { "title": "Smile",       "imgUrl": "./assets/ss (3).jpg"  },
+    { "title": "Happy",       "imgUrl": "./assets/ss (4).jpg"  },
+    { "title": "Joy",         "imgUrl": "./assets/ss (5).jpg"  },
+    { "title": "Elegant",     "imgUrl": "./assets/ss (6).jpg"  },
+    { "title": "Sweet",       "imgUrl": "./assets/ss (7).jpg"  },
+    { "title": "Pretty",      "imgUrl": "./assets/ss (8).jpg"  },
+    { "title": "Radiant",     "imgUrl": "./assets/ss (9).jpg"  },
+    { "title": "Gorgeous",    "imgUrl": "./assets/ss (10).jpg" },
+    { "title": "Lovely",      "imgUrl": "./assets/ss (11).jpg" },
+    { "title": "Charming",    "imgUrl": "./assets/ss (12).jpg" },
+    { "title": "Graceful",    "imgUrl": "./assets/ss (13).jpg" },
+    { "title": "Stunning",    "imgUrl": "./assets/ss (14).jpg" },
+    { "title": "Cheerful",    "imgUrl": "./assets/ss (15).jpg" },
+    { "title": "Bright",      "imgUrl": "./assets/ss (16).jpg" },
+    { "title": "Delightful",  "imgUrl": "./assets/ss (17).jpg" },
+    { "title": "Classy",      "imgUrl": "./assets/ss (18).jpg" },
+    { "title": "Adorable",    "imgUrl": "./assets/ss (19).jpg" },
+    { "title": "Splendid",    "imgUrl": "./assets/ss (20).jpg" },
+    { "title": "Glow",        "imgUrl": "./assets/ss (21).jpg" },
+    { "title": "Vibrant",     "imgUrl": "./assets/ss (22).jpg" },
+    { "title": "Angelic",     "imgUrl": "./assets/ss (23).jpg" },
     { "title": "Captivating", "imgUrl": "./assets/ss (24).jpg" }
- ]
+  ]
 }
