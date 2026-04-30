@@ -748,10 +748,227 @@ fetch('data.json')
     createFireflies();                    // uses utils.idle internally
     scheduleMusicInit();                  // deferred until scroll or idle
 
-    // ── Hide loader ──────────────────────────────────────────────
-    setTimeout(() => {
-      byId('loader')?.classList.add('hidden');
-      $('.book-controls')?.classList.remove('d-none');
-    }, 3000);
+    // ── Hide loader ASAP after critical content is ready ────────
+    // Wait for first paint then hide on next idle
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        byId('loader')?.classList.add('hidden');
+        $('.book-controls')?.classList.remove('d-none');
+      }, 600);
+    });
   })
   .catch(err => console.error('Failed to load data.json:', err));
+
+
+/* ================================================================
+   20. ENHANCED UI / UX  — added on top of original logic
+   • scroll progress bar
+   • side section nav dots + scroll spy
+   • top control rail (mute / celebrate / fullscreen / scroll-top)
+   • welcome toast (first visit, localStorage)
+   • cursor heart trail (throttled, respects reduced-motion)
+   • loader fake progress
+================================================================ */
+
+(() => {
+  // ── reduced motion check ──
+  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  // ── Sections list (id -> label) — must mirror index.html order ──
+  const SECTIONS = [
+    { id: 'bookSection',          label: 'The Book' },
+    { id: 'sliderSection',        label: 'Memories' },
+    { id: 'carouselSection',      label: 'Carousel' },
+    { id: 'spinSection',          label: '3D Spin' },
+    { id: 'jhoomarSection',       label: 'Hanging Hearts' },
+    { id: 'magicalGallerySection',label: 'Magical Gallery' },
+    { id: 'music-player-section', label: 'Music Player' },
+    { id: 'frameSection',         label: 'Circular Frame' },
+    { id: 'cakeFinaleSection',    label: 'Finale' },
+  ];
+
+  /* ── 1. SCROLL PROGRESS BAR ── */
+  const sp = byId('scrollProgress');
+  if (sp) {
+    let ticking = false;
+    const update = () => {
+      const max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+      const pct = Math.min(100, Math.max(0, (window.scrollY / max) * 100));
+      sp.style.width = pct + '%';
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+
+  /* ── 2. SIDE NAV DOTS + SCROLL SPY ── */
+  const sn = byId('sideNav');
+  if (sn) {
+    const present = SECTIONS.filter(s => byId(s.id));
+    sn.innerHTML = present.map(s =>
+      `<button class="sn-dot" data-target="${s.id}" data-label="${s.label}" aria-label="Jump to ${s.label}"></button>`
+    ).join('');
+    sn.addEventListener('click', e => {
+      const dot = e.target.closest('.sn-dot');
+      if (!dot) return;
+      const tgt = byId(dot.dataset.target);
+      if (tgt) tgt.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+    });
+
+    const dotMap = new Map();
+    sn.querySelectorAll('.sn-dot').forEach(d => dotMap.set(d.dataset.target, d));
+    const setActive = id => {
+      sn.querySelectorAll('.sn-dot.active').forEach(d => d.classList.remove('active'));
+      dotMap.get(id)?.classList.add('active');
+    };
+
+    const obs = new IntersectionObserver(entries => {
+      // pick the most visible section
+      const visible = entries.filter(e => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      if (visible.length) setActive(visible[0].target.id);
+    }, { threshold: [0.35, 0.55, 0.75] });
+    present.forEach(s => { const el = byId(s.id); if (el) obs.observe(el); });
+
+    // reveal once loader hides
+    setTimeout(() => sn.classList.add("ready"), 800);
+  }
+
+  /* ── 3. TOP CONTROL RAIL ── */
+  const tc      = byId('topControls');
+  const tcMute  = byId('tcMute');
+  const tcCel   = byId('tcCelebrate');
+  const tcFull  = byId('tcFullscreen');
+  const tcTop   = byId('tcTop');
+
+  if (tc) setTimeout(() => tc.classList.add("ready"), 800);
+
+  // mute / unmute (toggles the bgMusic + 3d music player audio)
+  tcMute?.addEventListener('click', () => {
+    const audios = $$('audio, video');
+    const muted  = !tcMute.classList.contains('is-muted');
+    audios.forEach(a => { a.muted = muted; });
+    tcMute.classList.toggle('is-muted', muted);
+    tcMute.querySelector('i').className = muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+    tcMute.title = muted ? 'Unmute music' : 'Mute music';
+  });
+
+  // celebrate — global confetti burst
+  tcCel?.addEventListener('click', () => spawnConfetti(80));
+
+  // fullscreen
+  tcFull?.addEventListener('click', () => {
+    const doc = document;
+    const isFs = doc.fullscreenElement || doc.webkitFullscreenElement;
+    if (!isFs) {
+      const el = doc.documentElement;
+      (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+      tcFull.querySelector('i').className = 'fa-solid fa-compress';
+    } else {
+      (doc.exitFullscreen || doc.webkitExitFullscreen)?.call(doc);
+      tcFull.querySelector('i').className = 'fa-solid fa-expand';
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (!tcFull) return;
+    const isFs = !!document.fullscreenElement;
+    tcFull.querySelector('i').className = isFs ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+  });
+
+  // back to top
+  tcTop?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+  });
+
+  /* ── 4. CONFETTI BURST (used by Celebrate button) ── */
+  function spawnConfetti(count = 60) {
+    const layer = document.createElement('div');
+    layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9500;overflow:hidden;';
+    document.body.appendChild(layer);
+    const colors = ['#ff7eb3', '#f5c842', '#ffae75', '#7ad7ff', '#b388ff', '#ff5e8a', '#fff5fc'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      const sz = 6 + Math.random() * 8;
+      const dur = 2 + Math.random() * 2.4;
+      const xDrift = (Math.random() - 0.5) * 200;
+      p.style.cssText =
+        `position:absolute;top:-30px;left:${Math.random() * 100}%;` +
+        `width:${sz}px;height:${sz * 1.6}px;background:${colors[i % colors.length]};` +
+        `border-radius:${Math.random() < 0.4 ? '50%' : '2px'};opacity:.95;` +
+        `transform:rotate(${Math.random() * 360}deg);` +
+        `animation:confettiBurst ${dur}s cubic-bezier(.2,.7,.3,1) ${Math.random() * 0.3}s forwards;` +
+        `--tx:${xDrift}px;`;
+      layer.appendChild(p);
+    }
+    setTimeout(() => layer.remove(), 4500);
+  }
+  // confetti keyframes (inject once)
+  if (!document.getElementById('confetti-burst-style')) {
+    const st = document.createElement('style');
+    st.id = 'confetti-burst-style';
+    st.textContent =
+      '@keyframes confettiBurst{0%{transform:translate(0,0) rotate(0)}' +
+      '100%{transform:translate(var(--tx),110vh) rotate(720deg);opacity:0}}';
+    document.head.appendChild(st);
+  }
+
+  /* ── 5. WELCOME TOAST (first visit) ── */
+  const wt = byId('welcomeToast');
+  if (wt) {
+    const KEY = 'somu_welcome_seen_v1';
+    const dismiss = () => {
+      wt.classList.remove('show');
+      wt.classList.add('hide');
+      localStorage.setItem(KEY, '1');
+      setTimeout(() => wt.remove(), 600);
+    };
+    byId('welcomeClose')?.addEventListener('click', dismiss);
+    if (!localStorage.getItem(KEY)) {
+      setTimeout(() => wt.classList.add("show"), 1200);
+      setTimeout(dismiss, 12000); // auto-hide after 12s
+    } else {
+      wt.remove();
+    }
+  }
+
+  /* ── 6. CURSOR HEART TRAIL (throttled, hover-only desktop) ── */
+  const ch = byId('cursorHearts');
+  const hasFinePointer = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+  if (ch && hasFinePointer && !prefersReduced) {
+    let last = 0;
+    const HEARTS = ['♥', '✦', '✧', '❤'];
+    document.addEventListener('mousemove', e => {
+      const now = performance.now();
+      if (now - last < 80) return;
+      last = now;
+      const piece = document.createElement('span');
+      piece.className = 'ch-piece';
+      piece.textContent = HEARTS[(Math.random() * HEARTS.length) | 0];
+      piece.style.left = e.clientX + 'px';
+      piece.style.top  = e.clientY + 'px';
+      piece.style.fontSize = (10 + Math.random() * 8) + 'px';
+      piece.style.color = Math.random() < 0.5 ? '#ff7eb3' : '#f5c842';
+      ch.appendChild(piece);
+      setTimeout(() => piece.remove(), 1300);
+    }, { passive: true });
+  }
+
+  /* ── 7. LOADER FAKE PROGRESS (visual sync with 3s reveal) ── */
+  const lp = byId('loaderProgressBar');
+  if (lp) {
+    let p = 0;
+    const tick = () => {
+      // ease toward 95% over ~2.6s
+      p += Math.max(0.6, (95 - p) * 0.05);
+      if (p > 95) p = 95;
+      lp.style.width = p + '%';
+      if (p < 95) setTimeout(tick, 90);
+    };
+    tick();
+    // jump to 100% just before loader hides (script.js line ~755 hides at 3000ms)
+    setTimeout(() => { lp.style.width = '100%'; }, 700);
+  }
+
+})();
