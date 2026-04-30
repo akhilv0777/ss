@@ -4,108 +4,236 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happy Birthday S....💕</title>
+  <title>Loading...</title>
+  <link id="siteFavicon" rel="shortcut icon" href="./assets/ss (46).jpg" type="image/x-icon">
+  <link id="siteFaviconApple" rel="apple-touch-icon" href="./assets/ss (46).jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Belanosima:wght@400;600;700&family=Merienda:wght@300..900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Belanosima:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" defer>
-  <link rel="shortcut icon" href="./assets/ss (46).jpg" type="image/x-icon">
-  <link rel="apple-touch-icon" href="./assets/ss (46).jpg">
-
 </head>
 
 <body>
+
+  <!-- LOADER -->
   <div class="loader" id="loader">
-    <div class="loader-ring"></div>
-    <i class="fa-solid fa-moon loader-icon"></i>
-    <p class="loader-text">Please Wait <i class="fa-regular fa-heart" style="color: rgb(255, 212, 59);"></i> <span
-        class="dots"></span></p>
+    <div class="loader-cake">
+      <div class="lc-body">
+        <div class="lc-layer lc-l3"></div>
+        <div class="lc-layer lc-l2"></div>
+        <div class="lc-layer lc-l1"></div>
+        <div class="lc-candles">
+          <div class="lc-candle">
+            <div class="lc-flame"></div>
+          </div>
+          <div class="lc-candle">
+            <div class="lc-flame"></div>
+          </div>
+          <div class="lc-candle">
+            <div class="lc-flame"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="loader-text"><span id="loaderWaitText"></span> <i class="fa-regular fa-heart"
+        style="color:rgb(255,212,59)"></i> <span class="dots"></span></p>
     <div class="loader-progress"><span id="loaderProgressBar"></span></div>
-    <p class="loader-hint">Crafting a magical experience for you...</p>
+    <p class="loader-hint" id="loaderHint"></p>
   </div>
 
-  <!-- Top scroll progress bar -->
+  <!-- Scroll progress -->
   <div class="scroll-progress" id="scrollProgress"></div>
 
-  <!-- Top-right floating control rail -->
+  <!-- Top control rail -->
   <div class="top-controls" id="topControls">
-    <button class="tc-btn" id="tcMute" title="Mute / Unmute music" aria-label="Toggle music">
-      <i class="fa-solid fa-volume-high"></i>
-    </button>
-    <button class="tc-btn" id="tcCelebrate" title="Celebrate!" aria-label="Confetti">
-      <i class="fa-solid fa-gift"></i>
-    </button>
-    <button class="tc-btn" id="tcFullscreen" title="Fullscreen" aria-label="Toggle fullscreen">
-      <i class="fa-solid fa-expand"></i>
-    </button>
-    <button class="tc-btn" id="tcTop" title="Back to top" aria-label="Back to top">
-      <i class="fa-solid fa-arrow-up"></i>
-    </button>
+    <button class="tc-btn" id="tcMute" title="Mute / Unmute" aria-label="Toggle music"><i
+        class="fa-solid fa-volume-high"></i></button>
+    <button class="tc-btn" id="tcCelebrate" title="Celebrate!" aria-label="Confetti"> <i
+        class="fa-solid fa-gift"></i></button>
+    <button class="tc-btn" id="tcFullscreen" title="Fullscreen" aria-label="Fullscreen"> <i
+        class="fa-solid fa-expand"></i></button>
+    <button class="tc-btn" id="tcTop" title="Back to top" aria-label="Back to top"> <i
+        class="fa-solid fa-arrow-up"></i></button>
   </div>
 
-  <!-- Side section navigation dots -->
+  <!-- Side nav dots -->
   <nav class="side-nav" id="sideNav" aria-label="Section navigation"></nav>
 
-  <!-- Welcome toast (first visit) -->
+  <!-- Welcome toast -->
   <div class="welcome-toast" id="welcomeToast" role="status" aria-live="polite">
     <div class="wt-icon"><i class="fa-solid fa-sparkles"></i></div>
     <div class="wt-body">
-      <strong>Welcome to a little surprise</strong>
-      <span>Scroll gently to explore. Use the dots on the right to jump anywhere.</span>
+      <strong id="wtTitle"></strong>
+      <span id="wtSubtitle"></span>
     </div>
     <button class="wt-close" id="welcomeClose" aria-label="Dismiss"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <!-- Cursor heart trail layer -->
+  <!-- Global layers -->
   <div class="cursor-hearts" id="cursorHearts" aria-hidden="true"></div>
-  <video src="./assets/ss (2).mp4" loop autoplay muted playsinline id="bgVideo"></video>
+  <video id="bgVideo" loop autoplay muted playsinline></video>
   <div class="bg-overlay"></div>
   <div class="bg-container" id="bgContainer"></div>
   <audio id="bgMusic" src="" loop></audio>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S1 · HERO
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="heroSection">
+    <div class="hero-stars" id="heroStars" aria-hidden="true"></div>
+    <div class="hero-content">
+      <p class="hero-greeting" id="heroGreeting"></p>
+      <h1 class="hero-name"><span id="heroNameLetters"></span></h1>
+      <p class="hero-tagline" id="heroTagline"></p>
+      <p class="hero-subtitle" id="heroSubtitle"></p>
+      <button class="hero-cta" id="heroCta">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="heroCtaText"></span>
+      </button>
+    </div>
+    <p class="hero-scroll-hint" id="heroScrollHint"></p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S2 · STATS COUNTER
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full sec-stats" id="statsSection">
+    <div class="stats-inner">
+      <div class="sec-header">
+        <h2 class="sec-title" id="statsSectionTitle"></h2>
+        <p class="sec-sub" id="statsSectionSub"></p>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S3 · BOOK / DIARY
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="bookSection">
     <div class="book-container" id="book"></div>
     <div class="book-controls">
-      <button id="prevBtn" onclick="goPrev()" class="btn-book">
-        <i class="fa-solid fa-chevron-left"></i> Previous
-      </button>
-      <button id="nextBtn" onclick="goNext()" class="btn-book">
-        Next <i class="fa-solid fa-chevron-right"></i>
-      </button>
+      <button id="prevBtn" onclick="goPrev()" class="btn-book"><i class="fa-solid fa-chevron-left"></i>
+        Previous</button>
+      <button id="nextBtn" onclick="goNext()" class="btn-book">Next <i class="fa-solid fa-chevron-right"></i></button>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S4 · MEMORIES SLIDER
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="sliderSection">
     <main class="slider-main">
-      <ul class='slider' id="sliderList"></ul>
-      <nav class='slider-nav'>
-        <ion-icon class='btn prev' name="arrow-back-outline"></ion-icon>
-        <ion-icon class='btn next' name="arrow-forward-outline"></ion-icon>
+      <ul class="slider" id="sliderList"></ul>
+      <nav class="slider-nav">
+        <ion-icon class="btn prev" name="arrow-back-outline"></ion-icon>
+        <ion-icon class="btn next" name="arrow-forward-outline"></ion-icon>
       </nav>
     </main>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S5 · 3D CAROUSEL
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="carouselSection">
-    <div class="carousel" id="dragCarousel">
+    <div class="carousel" id="dragCarousel"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S6 · POLAROID WALL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="polaroidSection">
+    <div class="polaroid-bg-blur" aria-hidden="true"></div>
+    <div class="polaroid-title-wrap">
+      <h2 class="polaroid-heading" id="polaroidHeading"></h2>
+      <p class="polaroid-sub" id="polaroidSub"></p>
+    </div>
+    <div class="polaroid-track-wrap">
+      <div class="polaroid-track" id="polaroidTrack"></div>
+    </div>
+    <div class="pol-scrollbar-wrap" id="polScrollbarWrap">
+      <div class="pol-scrollbar-track">
+        <div class="pol-scrollbar-thumb" id="polScrollThumb"></div>
+      </div>
+      <span class="pol-scroll-hint">← drag to scroll →</span>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S7 · FILM REEL STRIP
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="filmReelSection">
+    <div class="fr-overlay" aria-hidden="true"></div>
+    <div class="fr-header">
+      <h2 class="sec-title" id="filmReelHeading"></h2>
+      <p class="sec-sub" id="filmReelSub"></p>
+    </div>
+    <div class="fr-stage">
+      <div class="fr-strip fr-strip-top" id="frStripTop"></div>
+      <div class="fr-strip fr-strip-bot" id="frStripBot"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S8 · 3D SPINNER
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="spinSection">
     <div id="drag-container">
       <div id="spin-container">
-        <p>From Developer Akhil</p>
+        <p id="spinLabelText"></p>
       </div>
       <div id="ground"></div>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S9 · JHOOMAR (CHANDELIER HEARTS)
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="jhoomarSection">
-    <div class="jhoomar-container" id="jhoomar-container">
+    <div class="jhoomar-container" id="jhoomar-container"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S10 · FRIENDSHIP TIMELINE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="timelineSection">
+    <div class="timeline-wrapper">
+      <div class="timeline-header">
+        <h2 class="tl-title" id="timelineHeading"></h2>
+        <p class="tl-sub" id="timelineSub"></p>
+      </div>
+      <div class="timeline-scroll">
+        <div class="timeline-track" id="timelineTrack"></div>
+      </div>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S11 · QUALITIES WALL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="qualitiesSection">
+    <div class="ql-wrapper">
+      <div class="sec-header">
+        <h2 class="sec-title" id="qualitiesHeading"></h2>
+        <p class="sec-sub" id="qualitiesSub"></p>
+      </div>
+      <div class="ql-grid" id="qlGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S12 · MAGICAL GALLERY
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="magicalGallerySection">
     <div id="firefly-container"></div>
     <div class="magical-container" id="magical-cards-container"></div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       S13 · MUSIC PLAYER
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="music-player-section">
     <div id="music-popup">
       <div id="dot-visualizer"></div>
@@ -126,7 +254,6 @@
         <div class="wave"></div>
         <div class="wave"></div>
       </div>
-
       <div class="a">
         <div class="a__front face"></div>
         <div class="a__back face"></div>
@@ -216,7 +343,6 @@
         <div class="k__top face"></div>
         <div class="k__bottom face"></div>
       </div>
-
       <div class="buttons">
         <div class="button" id="mp-btn-3d-play">
           <div class="button-a">
@@ -267,7 +393,6 @@
           </div>
         </div>
       </div>
-
       <div class="circle flex">
         <div class="circle-a">
           <div class="circle-a__side"></div>
@@ -279,20 +404,14 @@
       </div>
     </div>
     <div class="custom-controls">
-      <label for="mp-file-upload" class="custom-file-upload" title="Upload Songs">
-        <i class="fas fa-upload"></i>
-      </label>
+      <label for="mp-file-upload" class="custom-file-upload" title="Upload Songs"><i class="fas fa-upload"></i></label>
       <input id="mp-file-upload" type="file" accept="audio/*" multiple />
-
       <div class="divider"></div>
-
       <button id="mp-btn-prev" class="ctrl-btn" title="Previous"><i class="fas fa-backward-step"></i></button>
       <button id="mp-btn-play-pause" class="ctrl-btn play-btn" title="Play/Pause"><i class="fas fa-play"
           id="mp-play-icon"></i></button>
       <button id="mp-btn-next" class="ctrl-btn" title="Next"><i class="fas fa-forward-step"></i></button>
-
       <div class="divider"></div>
-
       <div class="volume-knob-wrapper" title="Volume Control">
         <div class="de">
           <div class="den">
@@ -300,18 +419,12 @@
             <hr class="line">
             <hr class="line">
             <div class="switch">
-              <label for="switch_off"><span>OFF</span></label>
-              <label for="switch_1"><span>1</span></label>
-              <label for="switch_2"><span>2</span></label>
-              <label for="switch_3"><span>3</span></label>
-              <label for="switch_4"><span>4</span></label>
-              <label for="switch_5"><span>5</span></label>
-              <input type="radio" name="switch" id="switch_off">
-              <input type="radio" name="switch" id="switch_1">
-              <input type="radio" name="switch" id="switch_2">
-              <input type="radio" name="switch" id="switch_3">
-              <input type="radio" name="switch" id="switch_4">
-              <input type="radio" checked="" name="switch" id="switch_5">
+              <label for="switch_off"><span>OFF</span></label><label for="switch_1"><span>1</span></label><label
+                for="switch_2"><span>2</span></label><label for="switch_3"><span>3</span></label><label
+                for="switch_4"><span>4</span></label><label for="switch_5"><span>5</span></label>
+              <input type="radio" name="switch" id="switch_off"><input type="radio" name="switch" id="switch_1"><input
+                type="radio" name="switch" id="switch_2"><input type="radio" name="switch" id="switch_3"><input
+                type="radio" name="switch" id="switch_4"><input type="radio" checked name="switch" id="switch_5">
               <div class="light"><span></span></div>
               <div class="dot"><span></span></div>
               <div class="dene">
@@ -326,6 +439,40 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       S14 · WISH JAR
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="wishJarSection">
+    <div class="wj-wrapper">
+      <div class="wj-header">
+        <h2 class="wj-title" id="wjTitle"></h2>
+        <p class="wj-sub" id="wjSub"></p>
+      </div>
+      <div class="wj-scene">
+        <div class="wj-bubbles-layer" id="wjBubbles" aria-live="polite"></div>
+        <div class="wj-jar" id="wjJar" role="button" tabindex="0" aria-label="Release a wish">
+          <div class="wj-jar-neck"></div>
+          <div class="wj-jar-body">
+            <div class="wj-jar-shine"></div>
+            <div class="wj-jar-liquid" id="wjLiquid">
+              <div class="wj-small-bubble"></div>
+              <div class="wj-small-bubble"></div>
+              <div class="wj-small-bubble"></div>
+            </div>
+          </div>
+          <div class="wj-jar-lid"></div>
+          <div class="wj-jar-label" id="wjJarLabel">
+            <span>Birthday</span><span>Wishes</span>
+          </div>
+        </div>
+        <p class="wj-tap-hint" id="wjTapHint">✨ Tap to release a wish ✨</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S15 · CIRCULAR FRAME GALLERY
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="frameSection">
     <section class="circular-wrapper" id="gallery-wrapper">
       <div class="center-frame-container">
@@ -336,10 +483,36 @@
           <div class="text" id="dynamicTextContainer"></div>
         </div>
       </div>
-
     </section>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       S16 · LETTER
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-full" id="letterSection">
+    <div class="letter-scene" id="letterScene">
+      <div class="env-wrap" id="envWrap">
+        <div class="env-lid" id="envLid"></div>
+        <div class="env-body">
+          <div class="env-heart">💌</div>
+        </div>
+        <div class="env-open-hint" id="envHint"></div>
+      </div>
+      <div class="letter-card hidden" id="letterCard">
+        <div class="letter-deco-top"></div>
+        <h3 class="letter-section-title" id="letterSectionTitle"></h3>
+        <p class="letter-greeting" id="letterGreeting"></p>
+        <div class="letter-lines" id="letterLines"></div>
+        <p class="letter-closing" id="letterClosing"></p>
+        <p class="letter-sig" id="letterSig"></p>
+        <div class="letter-deco-bot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       S17 · CAKE FINALE
+  ══════════════════════════════════════════════════════════ -->
   <div class="section-full" id="cakeFinaleSection">
     <div class="container-desk" id="mainContainerDesk">
       <div class="lights">
@@ -351,7 +524,6 @@
         <div class="bulb"></div>
         <div class="bulb"></div>
       </div>
-
       <div class="hair1"></div>
       <div class="hair2"></div>
       <div class="hair3"></div>
@@ -372,13 +544,11 @@
       <div id="smile3"></div>
       <div id="blush1"></div>
       <div id="blush2"></div>
-
       <div id="table"></div>
       <div id="tableLeg"></div>
       <div class="chocolate choc1"></div>
       <div class="chocolate choc2"></div>
       <div class="chocolate choc3"></div>
-
       <div class="Clock">
         <div id="hour"></div>
         <div id="minute"></div>
@@ -397,22 +567,16 @@
         <div class="numbers ten">10</div>
         <div class="numbers eleven">11</div>
       </div>
-
       <div id="cake" onclick="blowCandleAndReveal()">
-        <div id="tap-text">Tap the cake <i class="fa-solid fa-cake-candles"></i></div>
+        <div id="tap-text"></div>
         <div class="flame" id="flame"></div>
         <div class="candle-sm"></div>
         <div class="cake-top"></div>
         <div class="cake-bottom"></div>
       </div>
-
       <div id="flowerPot"></div>
-      <div id="cup">
-        <i class="fa fa-heart" id="heartLeft"></i>
-        <i class="fa fa-heart" id="heartRight"></i>
-        <i class="fa fa-heart" id="heartCenter"></i>
-      </div>
-
+      <div id="cup"><i class="fa fa-heart" id="heartLeft"></i><i class="fa fa-heart" id="heartRight"></i><i
+          class="fa fa-heart" id="heartCenter"></i></div>
       <div id="chair"></div>
       <div id="chairLeg"></div>
       <div id="skirt"></div>
@@ -420,20 +584,18 @@
       <div id="shoe"></div>
       <div id="shoulder"></div>
     </div>
-
     <div class="grand-reveal hidden" id="grandReveal">
       <canvas id="birthdayCanvas"></canvas>
-      <h1 class="firework-text">Happy Birthday<br>Somu!<br> <i class="fa-solid fa-heart fa-beat"
-          style="color: rgb(107, 0, 0);"></i></h1>
+      <h1 class="firework-text" id="grandRevealText"></h1>
     </div>
   </div>
+
+  <!-- Floating rose button -->
   <div class="floating-rose-btn" onclick="openMagicalRose()">
     <i class="fa-solid fa-wand-magic-sparkles"></i>
   </div>
-
   <div id="roseOverlay" class="rose-overlay">
     <div class="close-rose" onclick="closeMagicalRose()"><i class="fa-solid fa-xmark"></i></div>
-
     <div class="rose-container">
       <div class="glass" id="magicGlass"></div>
       <div class="rose-parts">
@@ -466,14 +628,10 @@
         </div>
       </div>
     </div>
-
-    <div class="revealed-text">
-      Just like this magical rose, may your smile bloom forever... 🌹✨
-    </div>
+    <div class="revealed-text" id="roseText"></div>
   </div>
 
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
   <script src="script.js" defer></script>
 </body>
-
 </html>
