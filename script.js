@@ -216,11 +216,13 @@ function initCarousel() {
 /* ================================================================
    8. 3D SPINNER  — init deferred until section visible
 ================================================================ */
-function renderSpinner(spinner) {
+function renderSpinner(spinner, spinLabel) {
   const container = byId('spin-container');
   if (!container || !spinner?.length) return;
 
   const pTag = container.querySelector('p');
+  if (pTag && spinLabel) pTag.textContent = spinLabel;
+
   container.insertBefore(
     utils.buildFragment(spinner, ({ img }) => {
       const imgEl   = utils.el('img');
@@ -302,20 +304,32 @@ function renderJhoomar(items) {
   const container = byId('jhoomar-container');
   if (!container || !items?.length) return;
 
+  const section    = byId('jhoomarSection');
+
+  // Insert title block before container
+  if (section && !byId('jhoomarTitleBlock')) {
+    const tb = utils.el('div', 'jhoomar-title-block');
+    tb.id    = 'jhoomarTitleBlock';
+    tb.innerHTML =
+      `<h2 class="jhoomar-title">Frames of Love 💕</h2>` +
+      `<p class="jhoomar-sub">Every heart holds a memory worth keeping</p>`;
+    section.insertBefore(tb, container);
+  }
+
   const w          = window.innerWidth;
   const maxPerRow  = w < 600 ? 4 : w < 900 ? 6 : 9;
   const rows       = [];
 
   for (let i = 0; i < items.length; i += maxPerRow) {
-    const row  = items.slice(i, i + maxPerRow);
-    const n    = row.length;
-    const mid  = Math.max((n - 1) / 2, 1);
+    const row = items.slice(i, i + maxPerRow);
+    const n   = row.length;
+    const mid = Math.max((n - 1) / 2, 1);
 
     const cells = row.map(({ img }, j) => {
-      const dist = (j - mid) / mid;
-      const strH = 40 + 90 * (dist * dist);
-      const dur  = (2.5 + Math.random() * 1.5).toFixed(1) + 's';
-      const delay = Math.random().toFixed(1) + 's';
+      const dist  = (j - mid) / mid;
+      const strH  = 30 + 80 * (dist * dist);
+      const dur   = (2.2 + Math.random() * 1.8).toFixed(1) + 's';
+      const delay = (Math.random() * 0.8).toFixed(1) + 's';
       return `<div class="jhoomar-item" style="animation:swing ${dur} ease-in-out ${delay} infinite alternate;">` +
              `<div class="string" style="height:${strH}px"></div>` +
              `<div class="heart-frame"><img src="${img}" class="hanging-img" loading="lazy" decoding="async"></div></div>`;
@@ -408,11 +422,13 @@ function renderAnimatedFrame(imgUrl, textContent = 'HAPPY BIRTHDAY SAUMYA') {
   ).join('');
 }
 
-window.changeCenterFrame = imgUrl => renderAnimatedFrame(imgUrl, 'HAPPY BIRTHDAY SAUMYA');
+window.changeCenterFrame = (imgUrl, label) => renderAnimatedFrame(imgUrl, label || 'HAPPY BIRTHDAY SAUMYA');
 
-function initCircularGallery(animatedFrameImages) {
+function initCircularGallery(animatedFrameImages, frameText) {
   const wrapper = byId('gallery-wrapper');
   if (!wrapper || !animatedFrameImages?.length) return;
+
+  const label = frameText || 'HAPPY BIRTHDAY SAUMYA';
 
   const frag = document.createDocumentFragment();
   animatedFrameImages.forEach((item, index) => {
@@ -420,14 +436,14 @@ function initCircularGallery(animatedFrameImages) {
     const div    = utils.el('div', 'thumb');
     div.dataset.title   = item.title;
     div.style.setProperty('--i', index + 1);
-    div.innerHTML = `<a href="javascript:void(0)" onclick="changeCenterFrame('${imgUrl}')">` +
+    div.innerHTML = `<a href="javascript:void(0)" onclick="changeCenterFrame('${imgUrl}','${label}')">` +
                     `<img src="${imgUrl}" alt="${item.title}" loading="lazy" decoding="async"></a>`;
     frag.appendChild(div);
   });
   wrapper.appendChild(frag);
 
   const firstImg = animatedFrameImages[0].imgUrl || animatedFrameImages[0].img;
-  renderAnimatedFrame(firstImg, 'HAPPY BIRTHDAY SAUMYA');
+  renderAnimatedFrame(firstImg, label);
 }
 
 /* ================================================================
@@ -724,32 +740,452 @@ function openMagicalRose()  { byId('roseOverlay')?.classList.add('active');    s
 function closeMagicalRose() { byId('roseOverlay')?.classList.remove('active'); setTimeout(() => byId('magicGlass')?.classList.remove('lift-up'), 500); }
 
 /* ================================================================
+   19-A. POPULATE DYNAMIC TEXTS FROM DATA.JSON
+================================================================ */
+function populateDynamicTexts(data) {
+  const set  = (id, txt)  => { const el = byId(id); if (el && txt != null) el.textContent = txt; };
+  const setH = (id, html) => { const el = byId(id); if (el && html != null) el.innerHTML  = html; };
+
+  // ── Site meta ──────────────────────────────────────────────────────────────
+  if (data.site) {
+    if (data.site.title)   document.title = data.site.title;
+    if (data.site.favicon) {
+      const setFav = id => { const l = byId(id); if (l) l.href = data.site.favicon; };
+      setFav('siteFavicon'); setFav('siteFaviconApple');
+    }
+    if (data.site.bgVideo) {
+      const v = byId('bgVideo');
+      if (v) { v.src = data.site.bgVideo; v.load(); }
+    }
+  }
+
+  // ── Loader ─────────────────────────────────────────────────────────────────
+  if (data.loader) {
+    set('loaderWaitText', data.loader.waitText || 'Please Wait');
+    set('loaderHint',     data.loader.hint);
+  }
+
+  // ── Welcome toast ──────────────────────────────────────────────────────────
+  if (data.welcomeToast) {
+    set('wtTitle',    data.welcomeToast.title);
+    set('wtSubtitle', data.welcomeToast.subtitle);
+  }
+
+  // ── Hero CTA ───────────────────────────────────────────────────────────────
+  if (data.hero?.ctaText) set('heroCtaText', data.hero.ctaText);
+
+  // Wire hero CTA scroll
+  const heroCta = byId('heroCta');
+  if (heroCta) {
+    heroCta.addEventListener('click', () => {
+      byId('statsSection')?.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  // ── Section titles — from data.sectionTitles ───────────────────────────────
+  const st = data.sectionTitles || {};
+  const applyTitle = (headingId, subId, obj) => {
+    if (!obj) return;
+    set(headingId, obj.heading);
+    set(subId,     obj.sub);
+  };
+  applyTitle('statsSectionTitle',  'statsSectionSub',  st.stats);
+  applyTitle('polaroidHeading',    'polaroidSub',       st.polaroid);
+  applyTitle('filmReelHeading',    'filmReelSub',       st.filmReel);
+  applyTitle('timelineHeading',    'timelineSub',       st.timeline);
+  applyTitle('qualitiesHeading',   'qualitiesSub',      st.qualities);
+  applyTitle('wjTitle',            'wjSub',             st.wishJar);
+
+  if (st.wishJar) {
+    set('wjTapHint', st.wishJar.tapHint);
+    const jarLabel = byId('wjJarLabel');
+    if (jarLabel && st.wishJar.jarLabel) {
+      jarLabel.innerHTML = st.wishJar.jarLabel.map(t => `<span>${t}</span>`).join('');
+    }
+  }
+
+  // ── Letter envelope hint ───────────────────────────────────────────────────
+  if (data.letter?.openHint) set('envHint', data.letter.openHint);
+
+  // ── Grand reveal ───────────────────────────────────────────────────────────
+  if (data.grandReveal) {
+    const grt = byId('grandRevealText');
+    if (grt) {
+      setH('grandRevealText',
+        `${data.grandReveal.line1}<br>${data.grandReveal.line2}<br>` +
+        `<i class="fa-solid fa-heart fa-beat" style="color:rgb(107,0,0)"></i>`);
+    }
+    const tapEl = byId('tap-text');
+    if (tapEl && data.grandReveal.tapHint) {
+      tapEl.innerHTML = `${data.grandReveal.tapHint} <i class="fa-solid fa-cake-candles"></i>`;
+    }
+  }
+
+  // ── Spin label ─────────────────────────────────────────────────────────────
+  if (data.spinLabel) set('spinLabelText', data.spinLabel);
+
+  // ── Rose overlay ───────────────────────────────────────────────────────────
+  set('roseText', data.roseText);
+}
+
+/* ================================================================
+   19-B. HERO SECTION
+================================================================ */
+function renderHero(hero) {
+  if (!hero) return;
+
+  const setTxt = (id, t) => { const el = byId(id); if (el && t) el.textContent = t; };
+  setTxt('heroGreeting',   hero.greeting);
+  setTxt('heroTagline',    hero.tagline);
+  setTxt('heroSubtitle',   hero.subtitle);
+  setTxt('heroScrollHint', hero.scrollHint);
+
+  // Animate name letters
+  const lettersEl = byId('heroNameLetters');
+  if (lettersEl && hero.name) {
+    lettersEl.innerHTML = hero.name.split('').map((ch, i) =>
+      `<span class="hero-letter" style="--delay:${0.5 + i * 0.12}s">${ch}</span>`
+    ).join('');
+  }
+
+  // Create stars
+  const starsEl = byId('heroStars');
+  if (starsEl) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 120; i++) {
+      const s = document.createElement('div');
+      const sz = Math.random() * 3 + 1;
+      s.className = 'hero-star';
+      s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s;`;
+      frag.appendChild(s);
+    }
+    starsEl.appendChild(frag);
+  }
+}
+
+/* ================================================================
+   19-C. POLAROID WALL
+================================================================ */
+function renderPolaroidWall(cards) {
+  const track = byId('polaroidTrack');
+  if (!track || !cards?.length) return;
+
+  const rots = [-3, 2, -1.5, 3, -2.5, 1, -4, 2.5, -1, 3.5];
+  track.appendChild(utils.buildFragment(cards, ({ img, title }, i) => {
+    const card = utils.el('div', 'polaroid-card');
+    card.style.setProperty('--rot', (rots[i % rots.length]) + 'deg');
+    card.innerHTML =
+      `<div class="pol-img-wrap"><img src="${img}" loading="lazy" decoding="async" alt="${title}"></div>` +
+      `<div class="polaroid-caption">${title}</div>`;
+    return card;
+  }));
+
+  // ── Drag scroll (mouse + touch) ──────────────────────────────────
+  let isDown = false, startX = 0, scrollLeft = 0;
+  track.addEventListener('mousedown',   e => { isDown = true; startX = e.pageX - track.offsetLeft; scrollLeft = track.scrollLeft; track.style.cursor = 'grabbing'; });
+  track.addEventListener('mouseleave',  () => { isDown = false; track.style.cursor = ''; });
+  track.addEventListener('mouseup',     () => { isDown = false; track.style.cursor = ''; });
+  track.addEventListener('mousemove',   e => {
+    if (!isDown) return;
+    e.preventDefault();
+    track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX);
+    updatePolScrollbar();
+  });
+  // Touch scroll
+  let touchStartX = 0, touchScrollLeft = 0;
+  track.addEventListener('touchstart',  e => { touchStartX = e.touches[0].pageX; touchScrollLeft = track.scrollLeft; }, { passive: true });
+  track.addEventListener('touchmove',   e => { track.scrollLeft = touchScrollLeft - (e.touches[0].pageX - touchStartX); updatePolScrollbar(); }, { passive: true });
+
+  // ── Custom scrollbar ─────────────────────────────────────────────
+  const thumb = byId('polScrollThumb');
+  function updatePolScrollbar() {
+    if (!thumb) return;
+    const ratio   = track.clientWidth / track.scrollWidth;
+    const thumbW  = Math.max(ratio * 100, 8);
+    const thumbL  = (track.scrollLeft / (track.scrollWidth - track.clientWidth)) * (100 - thumbW);
+    thumb.style.width = thumbW + '%';
+    thumb.style.left  = (thumbL || 0) + '%';
+  }
+  track.addEventListener('scroll', updatePolScrollbar, { passive: true });
+  // init after images load
+  setTimeout(updatePolScrollbar, 400);
+}
+
+/* ================================================================
+   19-D. TIMELINE
+================================================================ */
+function renderTimeline(items) {
+  const track = byId('timelineTrack');
+  if (!track || !items?.length) return;
+
+  track.appendChild(utils.buildFragment(items, ({ label, title, desc, img, color }, i) => {
+    const item = utils.el('div', 'tl-item');
+    item.style.transitionDelay = (i * 0.1) + 's';
+    item.style.setProperty('--color', color || '#f5c842');
+    item.innerHTML =
+      `<div class="tl-card">` +
+        `<img class="tl-card-img" src="${img}" loading="lazy" decoding="async" alt="${title}">` +
+        `<div class="tl-label">${label}</div>` +
+        `<div class="tl-card-title">${title}</div>` +
+        `<div class="tl-card-desc">${desc}</div>` +
+      `</div>` +
+      `<div class="tl-dot" style="--color:${color}"></div>`;
+    return item;
+  }));
+
+  // Drag scroll
+  let isDown = false, startX = 0, scrollLeft = 0;
+  track.addEventListener('mousedown',  e => { isDown = true; startX = e.pageX - track.offsetLeft; scrollLeft = track.scrollLeft; });
+  track.addEventListener('mouseleave', () => isDown = false);
+  track.addEventListener('mouseup',    () => isDown = false);
+  track.addEventListener('mousemove',  e => {
+    if (!isDown) return; e.preventDefault();
+    track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX);
+  });
+
+  // Animate items into view
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.3 });
+  track.querySelectorAll('.tl-item').forEach(el => obs.observe(el));
+}
+
+/* ================================================================
+   19-E. WISH JAR
+================================================================ */
+function initWishJar(wishes) {
+  if (!wishes?.length) return;
+  const jar     = byId('wjJar');
+  const layer   = byId('wjBubbles');
+  if (!jar || !layer) return;
+
+  let wishIndex = 0;
+
+  const releaseWish = () => {
+    const wish  = wishes[wishIndex % wishes.length];
+    wishIndex++;
+
+    const bubble = utils.el('div', 'wj-bubble');
+    bubble.textContent = wish.wish;
+    bubble.style.background = `linear-gradient(135deg, ${wish.color}cc, ${wish.color}88)`;
+    bubble.style.borderColor = wish.color + '55';
+    bubble.style.left  = `${utils.rand(15, 65)}vw`;
+    bubble.style.setProperty('--dur', `${utils.rand(5, 8)}s`);
+    layer.appendChild(bubble);
+
+    // Jiggle the jar
+    jar.style.transform = 'scale(0.93) rotate(-3deg)';
+    setTimeout(() => { jar.style.transform = ''; }, 250);
+
+    setTimeout(() => bubble.remove(), 8500);
+  };
+
+  jar.addEventListener('click', releaseWish);
+  jar.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') releaseWish(); });
+
+  // Auto-release first wish after 1s
+  setTimeout(releaseWish, 1000);
+}
+
+/* ================================================================
+   19-F. LETTER SECTION
+================================================================ */
+function renderLetter(letter) {
+  if (!letter) return;
+
+  const setTxt = (id, t) => { const el = byId(id); if (el && t) el.textContent = t; };
+  setTxt('letterSectionTitle', letter.sectionTitle);
+  setTxt('letterGreeting',     letter.greeting);
+  setTxt('letterClosing',      letter.closing);
+  setTxt('letterSig',          letter.signature);
+
+  const linesEl = byId('letterLines');
+  if (linesEl && letter.lines?.length) {
+    linesEl.innerHTML = letter.lines.map(line =>
+      `<p class="letter-line">${line}</p>`
+    ).join('');
+  }
+
+  // Envelope open interaction
+  const envWrap  = byId('envWrap');
+  const letterCard = byId('letterCard');
+  const envHint  = byId('envHint');
+  let opened = false;
+
+  const openLetter = () => {
+    if (opened) return;
+    opened = true;
+    envWrap.classList.add('open');
+    if (envHint) envHint.style.opacity = '0';
+
+    setTimeout(() => {
+      envWrap.style.opacity    = '0';
+      envWrap.style.transform  = 'scale(0.85)';
+      envWrap.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+      setTimeout(() => {
+        envWrap.style.display = 'none';
+        letterCard.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            letterCard.classList.add('open');
+            // Animate letter lines
+            const lines = letterCard.querySelectorAll('.letter-line');
+            lines.forEach((l, i) => setTimeout(() => l.classList.add('visible'), 400 + i * 220));
+          });
+        });
+      }, 500);
+    }, 600);
+  };
+
+  envWrap?.addEventListener('click', openLetter);
+  envWrap?.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openLetter(); });
+}
+
+/* ================================================================
+   19-G. STATS COUNTER
+================================================================ */
+function renderStats(stats, titles) {
+  const grid = byId('statsGrid');
+  if (!grid || !stats?.length) return;
+
+  const frag = document.createDocumentFragment();
+  stats.forEach(s => {
+    const card = utils.el('div', 'stat-card');
+    card.innerHTML = `
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-num" data-target="${s.value}" data-suffix="${s.suffix || ''}">0</div>
+      <div class="stat-label">${s.label}</div>`;
+    frag.appendChild(card);
+  });
+  grid.appendChild(frag);
+
+  // Animate numbers when section enters view
+  const animateCounters = () => {
+    grid.querySelectorAll('.stat-num').forEach(el => {
+      const target  = +el.dataset.target;
+      const suffix  = el.dataset.suffix || '';
+      const dur     = 2000;
+      const start   = performance.now();
+      const tick = now => {
+        const prog = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - prog, 3);
+        el.textContent = Math.floor(ease * target) + (prog >= 1 ? suffix : '');
+        if (prog < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  };
+  lazyInit('#statsSection', animateCounters, '0px 0px -80px 0px');
+}
+
+/* ================================================================
+   19-H. FILM REEL STRIP
+================================================================ */
+function renderFilmReel(images) {
+  const top = byId('frStripTop');
+  const bot = byId('frStripBot');
+  if (!top || !bot || !images?.length) return;
+
+  // Build a doubled list for seamless infinite loop
+  const buildStrip = imgs => {
+    const doubled = [...imgs, ...imgs];
+    return doubled.map(src => `
+      <div class="fr-frame">
+        <div class="fr-sprocket fr-sp-t"></div>
+        <img src="${src}" alt="Memory" loading="lazy">
+        <div class="fr-sprocket fr-sp-b"></div>
+      </div>`).join('');
+  };
+
+  top.innerHTML = buildStrip(images);
+  bot.innerHTML = buildStrip([...images].reverse());
+
+  // Inject keyframe & animation dynamically (once)
+  if (!document.getElementById('fr-anim-style')) {
+    const style = document.createElement('style');
+    style.id = 'fr-anim-style';
+    const frameW   = 160; // px per frame (matches CSS)
+    const totalPx  = images.length * frameW;
+    style.textContent = `
+      @keyframes frScrollL { from { transform: translateX(0) } to { transform: translateX(-${totalPx}px) } }
+      @keyframes frScrollR { from { transform: translateX(-${totalPx}px) } to { transform: translateX(0) } }
+      .fr-strip-top { animation: frScrollL ${images.length * 1.8}s linear infinite; }
+      .fr-strip-bot { animation: frScrollR ${images.length * 1.8}s linear infinite; }
+      .fr-strip-top:hover, .fr-strip-bot:hover { animation-play-state: paused; }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+/* ================================================================
+   19-I. QUALITIES WALL
+================================================================ */
+function renderQualities(qualities) {
+  const grid = byId('qlGrid');
+  if (!grid || !qualities?.length) return;
+
+  const frag = document.createDocumentFragment();
+  qualities.forEach((q, i) => {
+    const card = utils.el('div', 'ql-card');
+    card.style.setProperty('--ql-color', q.color || '#f5c842');
+    card.style.animationDelay = `${i * 0.12}s`;
+    card.innerHTML = `
+      <div class="ql-icon-wrap">
+        <i class="fa-solid ${q.icon} ql-icon"></i>
+      </div>
+      <h3 class="ql-title">${q.title}</h3>
+      <p  class="ql-desc">${q.desc}</p>
+      <div class="ql-line"></div>`;
+    frag.appendChild(card);
+  });
+  grid.appendChild(frag);
+
+  // Stagger-reveal cards on scroll-into-view
+  lazyInit('#qualitiesSection', () => {
+    grid.querySelectorAll('.ql-card').forEach((c, i) => {
+      setTimeout(() => c.classList.add('ql-visible'), i * 120);
+    });
+  }, '0px 0px -60px 0px');
+}
+
+/* ================================================================
    19. BOOTSTRAP
    Single fetch — split into critical (above-fold) vs deferred.
-   Critical: book, clock, loader dismissal.
-   Deferred:  everything else, scheduled via lazyInit / idle.
 ================================================================ */
 fetch('data.json')
   .then(r => r.json())
   .then(data => {
+    // ── Populate all dynamic texts (site meta, headings, etc.) ───
+    populateDynamicTexts(data);
+
     // ── Critical path (above fold) ───────────────────────────────
+    renderHero(data.hero);
     renderBook(data.book);
     initClock();
 
-    // ── Deferred renders (below fold — will init on scroll-into-view)
-    renderSlider(data.memories);          // wires its own observer
-    renderCarousel(data.carousel);        // observer set inside renderCarousel
-    renderSpinner(data.spinner);          // observer set inside renderSpinner
+    // ── New sections ─────────────────────────────────────────────
+    renderStats(data.stats, data.sectionTitles?.stats);
+    lazyInit('#filmReelSection',  () => renderFilmReel(data.filmReel));
+    lazyInit('#qualitiesSection', () => renderQualities(data.qualities));
+
+    // ── Existing deferred renders ─────────────────────────────────
+    renderSlider(data.memories);
+    renderCarousel(data.carousel);
+    renderPolaroidWall(data.carouselCards);
+    renderSpinner(data.spinner, data.spinLabel);
     renderJhoomar(data.jhoomar);
-    renderMagicalGallery(data.magicalGallery); // observer set inside render
-    initCircularGallery(data.AnimatedFrameImages);
+    lazyInit('#timelineSection', () => renderTimeline(data.timeline));
+    renderMagicalGallery(data.magicalGallery);
+    initCircularGallery(data.AnimatedFrameImages, data.frameText);
+    lazyInit('#wishJarSection', () => initWishJar(data.wishJar));
+    lazyInit('#letterSection',  () => renderLetter(data.letter));
 
     // ── Idle tasks ───────────────────────────────────────────────
-    createFireflies();                    // uses utils.idle internally
-    scheduleMusicInit();                  // deferred until scroll or idle
+    createFireflies();
+    scheduleMusicInit();
 
-    // ── Hide loader ASAP after critical content is ready ────────
-    // Wait for first paint then hide on next idle
+    // ── Hide loader after critical content is ready ──────────────
     requestAnimationFrame(() => {
       setTimeout(() => {
         byId('loader')?.classList.add('hidden');
@@ -776,15 +1212,23 @@ fetch('data.json')
 
   // ── Sections list (id -> label) — must mirror index.html order ──
   const SECTIONS = [
-    { id: 'bookSection',          label: 'The Book' },
-    { id: 'sliderSection',        label: 'Memories' },
-    { id: 'carouselSection',      label: 'Carousel' },
-    { id: 'spinSection',          label: '3D Spin' },
+    { id: 'heroSection',          label: 'Welcome'        },
+    { id: 'statsSection',         label: 'Our Numbers'    },
+    { id: 'bookSection',          label: 'The Book'       },
+    { id: 'sliderSection',        label: 'Memories'       },
+    { id: 'carouselSection',      label: 'Carousel'       },
+    { id: 'polaroidSection',      label: 'Polaroids'      },
+    { id: 'filmReelSection',      label: 'Film Reel'      },
+    { id: 'spinSection',          label: '3D Spin'        },
     { id: 'jhoomarSection',       label: 'Hanging Hearts' },
-    { id: 'magicalGallerySection',label: 'Magical Gallery' },
-    { id: 'music-player-section', label: 'Music Player' },
+    { id: 'timelineSection',      label: 'Our Journey'    },
+    { id: 'qualitiesSection',     label: 'Qualities'      },
+    { id: 'magicalGallerySection',label: 'Magical Gallery'},
+    { id: 'music-player-section', label: 'Music Player'   },
+    { id: 'wishJarSection',       label: 'Wish Jar'       },
     { id: 'frameSection',         label: 'Circular Frame' },
-    { id: 'cakeFinaleSection',    label: 'Finale' },
+    { id: 'letterSection',        label: 'Letter'         },
+    { id: 'cakeFinaleSection',    label: 'Finale'         },
   ];
 
   /* ── 1. SCROLL PROGRESS BAR ── */
@@ -877,9 +1321,17 @@ fetch('data.json')
     tcFull.querySelector('i').className = isFs ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
   });
 
-  // back to top
+  // back to top — cross-browser fix
   tcTop?.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+    const behavior = prefersReduced ? 'auto' : 'smooth';
+    try { window.scrollTo({ top: 0, behavior }); } catch(e) {}
+    try { document.documentElement.scrollTo({ top: 0, behavior }); } catch(e) {}
+    try { document.body.scrollTo({ top: 0, behavior }); } catch(e) {}
+    // hard fallback for edge cases
+    setTimeout(() => {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 50);
   });
 
   /* ── 4. CONFETTI BURST (used by Celebrate button) ── */
